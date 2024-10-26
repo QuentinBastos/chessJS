@@ -1,3 +1,4 @@
+/*
 import { Request, Response } from 'express';
 import chessService from '../services/chessService';
 
@@ -18,4 +19,4 @@ class ChessController {
     }
 }
 
-export default new ChessController();
+export default new ChessController();*/
