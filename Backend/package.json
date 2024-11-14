@@ -1,12 +1,41 @@
 {
   "name": "node_project",
   "version": "1.0.0",
-  "description": "",
   "main": "dist/app.js",
+  "compilerOptions": {
+    "target": "es2022",
+    "lib": [
+      "ESNext",
+      "dom"
+    ],
+    "module": "commonjs",
+    "outDir": "./build",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
   "scripts": {
     "start": "tsc && node dist/app.js",
     "lint": "eslint .. --ext .ts",
-    "test": "jest"
+    "test": "jest",
+    "generate": "npx run tsoa:routes && npx run tsoa:spec",
+    "predev": "npm run swagger",
+    "swagger": "tsoa spec"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src"
+    ],
+    "ext": "ts",
+    "exec": "ts-node src/app.ts"
   },
   "keywords": [],
   "author": "",
@@ -15,22 +44,32 @@
     "@eslint/js": "^9.13.0",
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.7.9",
+    "@types/node": "^22.9.0",
     "eslint": "^9.13.0",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-vue": "^9.29.1",
     "globals": "^15.11.0",
     "jest": "^29.7.0",
+    "jsonwebtoken": "^9.0.2",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
+    "tsoa": "^6.5.1",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.11.0"
   },
   "dependencies": {
+    "@types/joi": "^17.2.3",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/morgan": "^1.9.9",
+    "@types/sequelize": "^4.28.20",
+    "@types/swagger-ui-express": "^4.1.6",
     "express": "^4.21.1",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
     "sequelize": "^6.37.4",
+    "sqlite3": "^5.1.7",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1",
-    "tsoa": "^6.5.1"
-  }
+    "swagger-ui-express": "^5.0.1"
+  },
+  "description": ""
 }
