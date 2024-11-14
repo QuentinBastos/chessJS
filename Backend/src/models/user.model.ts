@@ -3,7 +3,7 @@ import sequelize from "../config/database"; // Connexion à la base de données
 
 export interface UserAttributes {
     id?: number;
-    name: string;
+    username: string;
     email: string;
     password: string;
     rank: number;
@@ -14,7 +14,7 @@ export class User
     implements UserAttributes
 {
     public id!: number;
-    public name!: string;
+    public username!: string;
     public email!: string;
     public password!: string;
     public rank!: number;
@@ -27,7 +27,7 @@ User.init(
             autoIncrement: true,
             primaryKey: true,
         },
-        name: {
+        username: {
             type: DataTypes.STRING,
             allowNull: false,
         },

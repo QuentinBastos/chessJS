@@ -2,33 +2,12 @@
   "name": "node_project",
   "version": "1.0.0",
   "main": "dist/app.js",
-  "compilerOptions": {
-    "target": "es2022",
-    "lib": [
-      "ESNext",
-      "dom"
-    ],
-    "module": "commonjs",
-    "outDir": "./build",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules"
-  ],
   "scripts": {
     "start": "tsc && node dist/app.js",
     "lint": "eslint .. --ext .ts",
     "test": "jest",
-    "generate": "npx run tsoa:routes && npx run tsoa:spec",
-    "predev": "npm run swagger",
-    "swagger": "tsoa spec"
+    "generate": "npx tsoa:routes && npx tsoa:spec",
+    "predev": "npm run swagger"
   },
   "nodemonConfig": {
     "watch": [

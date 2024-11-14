@@ -21,13 +21,13 @@ export class UserService {
     }
 
     public async createUser(
-        name: string,
+        username: string,
         email: string,
         password: string,
         rank: number,
     ): Promise<UserOutputDTO> {
         return UserMapper.toOutputDto(
-            await User.create({ name: name ,email: email ,password: password, rank: rank }),
+            await User.create({ username: username ,email: email ,password: password, rank: rank }),
         );
     }
 
@@ -42,14 +42,14 @@ export class UserService {
 
     public async updateUser(
         id: number,
-        name?: string,
+        username?: string,
         email?: string,
         password?: string,
         rank?: number,
     ): Promise<UserOutputDTO> {
         const user = await User.findByPk(id);
         if (user) {
-            if (name) user.name = name;
+            if (username) user.username = username;
             if (email) user.email = email;
             if (password) user.password = password;
             if (rank) user.rank = rank;

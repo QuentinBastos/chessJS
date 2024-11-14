@@ -12,6 +12,8 @@ export function expressAuthentication(
             request.query.token ||
             request.headers["authorization"]?.split(' ')[1];
 
+        console.log("Extracted Token: ", token);  // Log the extracted token
+
         return new Promise((resolve, reject) => {
             if (!token) {
                 reject(new Error("No token provided"));

@@ -1,12 +1,12 @@
 export interface UserInputDTO {
-    name: string;
+    username: string;
     email: string;
     password: string;
     rank: number;
 }
 
 export interface UserInputPatchDTO {
-    name?: string;
+    username?: string;
     email?: string;
     password?: string;
     rank?: number;
@@ -14,7 +14,7 @@ export interface UserInputPatchDTO {
 
 export interface UserOutputDTO {
     id: number
-    name: string;
+    username: string;
     email: string;
     password: string;
     rank: number;

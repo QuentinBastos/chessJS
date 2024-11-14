@@ -35,8 +35,8 @@ export class UserController extends Controller {
     public async createUser(
         @Body() requestBody: UserInputDTO,
     ): Promise<UserOutputDTO> {
-        const { name, email, password, rank } = requestBody;
-        return userService.createUser(name, email, password, rank);
+        const { username, email, password, rank } = requestBody;
+        return userService.createUser(username, email, password, rank);
     }
 
     @Delete("{id}")
@@ -49,7 +49,7 @@ export class UserController extends Controller {
         @Path() id: number,
         @Body() requestBody: UserInputPatchDTO,
     ): Promise<UserOutputDTO> {
-        const { name, email, password, rank } = requestBody;
-        return userService.updateUser(id, name, email, password, rank);
+        const { username, email, password, rank } = requestBody;
+        return userService.updateUser(id, username, email, password, rank);
     }
 }

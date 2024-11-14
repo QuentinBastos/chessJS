@@ -57,7 +57,7 @@ class ChessService {
         const piece = this.board[from[0]][from[1]];
         if (piece) {
             this.board[to[0]][to[1]] = piece;
-            this.board[from[0]][from[1]] = null;
+            //this.board[from[0]][from[1]] = null;
             piece.move(to);
             return true;
         }
