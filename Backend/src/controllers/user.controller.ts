@@ -19,14 +19,16 @@ import {
 
 @Route("users")
 @Tags("Users")
-@Security("jwt")
+
 export class UserController extends Controller {
     @Get("/")
+    @Security("jwt")
     public async getAllUsers(): Promise<UserOutputDTO[]> {
         return userService.getAllUsers();
     }
 
     @Get("{id}")
+    @Security("jwt")
     public async getUserById(@Path() id: number): Promise<UserOutputDTO> {
         return userService.getUserById(id);
     }
@@ -40,11 +42,13 @@ export class UserController extends Controller {
     }
 
     @Delete("{id}")
+    @Security("jwt")
     public async deleteUser(@Path() id: number): Promise<void> {
         await userService.deleteUser(id);
     }
 
     @Patch("{id}")
+    @Security("jwt")
     public async updateUser(
         @Path() id: number,
         @Body() requestBody: UserInputPatchDTO,
