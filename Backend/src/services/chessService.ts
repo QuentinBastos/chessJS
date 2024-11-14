@@ -1,15 +1,15 @@
 import { ChessFigure, Rook, Knight, Bishop, Queen, King, Pawn, ChessColor } from '../interface';
 
 class ChessService {
-    private readonly board: ChessFigure[][];
+    private readonly board: (ChessFigure | null)[][];
 
     constructor() {
         this.board = this.createEmptyBoard();
         this.initializeStandardChess();
     }
 
-    private createEmptyBoard(): ChessFigure[][] {
-        const board: ChessFigure[][] = [];
+    private createEmptyBoard(): (ChessFigure | null)[][] {
+        const board: (ChessFigure | null)[][] = [];
         for (let i = 0; i < 8; i++) {
             board[i] = new Array(8).fill(null);
         }
@@ -49,7 +49,7 @@ class ChessService {
         this.board[file][rank] = piece;
     }
 
-    public getBoard(): ChessFigure[][] {
+    public getBoard(): (ChessFigure | null)[][] {
         return this.board;
     }
 
