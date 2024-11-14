@@ -53,16 +53,56 @@ class ChessService {
         return this.board;
     }
 
+    public checkMove(piece: ChessFigure, to: [number, number]): boolean {
+        if (!this.isValidPosition(to)) {
+            return false;
+        }
+
+        const targetPiece = this.board[to[0]][to[1]];
+
+        // Check if the target position is occupied by a piece of the same color
+        if (targetPiece && targetPiece.color === piece.color) {
+            return false;
+        }
+
+        // Check if the move is valid for the specific piece
+        if (!piece.isValidMove(to, this.board)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public checkDelete(piece: ChessFigure, position: [number, number]): boolean {
+        if (!this.isValidPosition(position)) {
+            return false;
+        }
+
+        const targetPiece = this.board[position[0]][position[1]];
+
+        // Check if the piece at the position matches the given piece
+        if (targetPiece && targetPiece === piece) {
+            return true;
+        }
+
+        return false;
+    }
+
     public movePiece(from: [number, number], to: [number, number]): boolean {
         if (!this.isValidPosition(to)) {
             return false;
         }
 
         const piece = this.board[from[0]][from[1]];
-        if (piece) {
+        if (piece && this.checkMove(piece, to)) {
+            const targetPiece = this.board[to[0]][to[1]];
+            if (targetPiece && targetPiece.color !== piece.color) {
+                // Capture the opponent's piece
+                this.board[to[0]][to[1]] = null;
+            }
             this.board[to[0]][to[1]] = piece;
             this.board[from[0]][from[1]] = null;
-            piece.move(to);
+            piece.move(to, this.board);
             return true;
         }
         return false;

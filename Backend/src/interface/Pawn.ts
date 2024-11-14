@@ -1,18 +1,40 @@
-import {ChessColor, ChessFigure} from "./ChessFigure";
+import { ChessColor, ChessFigure } from "./ChessFigure";
 
 export class Pawn extends ChessFigure {
     constructor(position: [number, number], color: ChessColor) {
         super(position, color);
     }
 
-    move(toPosition: [number, number]): void {
-        const [targetFile, targetRank] = toPosition;
+    move(toPosition: [number, number], board: (ChessFigure | null)[][]): void {
+        if (this.isValidMove(toPosition, board)) {
+            this.position = toPosition;
+        }
+    }
+
+    isValidMove(to: [number, number], board: (ChessFigure | null)[][]): boolean {
+        const [targetFile, targetRank] = to;
         const [currentFile, currentRank] = this.position;
         const fileDiff = Math.abs(targetFile - currentFile);
         const rankDiff = targetRank - currentRank;
 
+        // Pawn moves one square forward
         if (rankDiff === 1 && fileDiff === 0) {
-            this.position = toPosition;
+            const targetPiece = board[targetFile][targetRank];
+            // Check if the target position is empty
+            if (targetPiece === null) {
+                return true;
+            }
         }
+
+        // Pawn captures diagonally
+        if (rankDiff === 1 && fileDiff === 1) {
+            const targetPiece = board[targetFile][targetRank];
+            // Check if the target position is occupied by an opponent's piece
+            if (targetPiece !== null && targetPiece.color !== this.color) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

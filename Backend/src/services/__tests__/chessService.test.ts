@@ -1,5 +1,5 @@
 import ChessService from '../chessService';
-import { ChessColor } from '../../interface';
+import { ChessColor, Pawn } from '../../interface';
 
 describe('ChessService', () => {
     let chessService: ChessService;
@@ -47,5 +47,33 @@ describe('ChessService', () => {
         const to: [number, number] = [-1, 1]; // Outside the board
         const success = chessService.movePiece(from, to);
         expect(success).toBe(false);
+    });
+
+    test('should check if a move is valid', () => {
+        const piece = chessService.getBoard()[0][1]; // White pawn
+        const to: [number, number] = [0, 2];
+        const isValid = chessService.checkMove(piece!, to);
+        expect(isValid).toBe(true);
+    });
+
+    test('should check if a move is invalid', () => {
+        const piece = chessService.getBoard()[0][1]; // White pawn
+        const to: [number, number] = [0, 3]; // Invalid move for a pawn
+        const isValid = chessService.checkMove(piece!, to);
+        expect(isValid).toBe(false);
+    });
+
+    test('should check if a piece can be deleted', () => {
+        const piece = chessService.getBoard()[0][1]; // White pawn
+        const position: [number, number] = [0, 1];
+        const canDelete = chessService.checkDelete(piece!, position);
+        expect(canDelete).toBe(true);
+    });
+
+    test('should check if a piece cannot be deleted', () => {
+        const piece = new Pawn([0, 2], ChessColor.White); // New pawn not on the board
+        const position: [number, number] = [0, 1];
+        const canDelete = chessService.checkDelete(piece, position);
+        expect(canDelete).toBe(false);
     });
 });

@@ -2,17 +2,18 @@ export enum ChessColor {
     White = "white",
     Black = "black",
 }
-
-export class ChessFigure {
+export abstract class ChessFigure {
     position: [number, number];
     color: ChessColor;
 
-    constructor(position: [number, number], color: ChessColor) {
+    protected constructor(position: [number, number], color: ChessColor) {
         this.position = position;
         this.color = color;
     }
 
-    move(toPosition: [number, number]): void {
+    move(toPosition: [number, number], board: (ChessFigure | null)[][]): void {
         this.position = toPosition;
     }
+
+    abstract isValidMove(to: [number, number], board: (ChessFigure | null)[][]): boolean;
 }
