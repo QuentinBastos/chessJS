@@ -17,7 +17,6 @@ class ChessService {
     }
 
     private initializeStandardChess(): void {
-        // Place the chess pieces in their standard positions
         this.placePiece(new Rook([0, 0], ChessColor.White));
         this.placePiece(new Knight([1, 0], ChessColor.White));
         this.placePiece(new Bishop([2, 0], ChessColor.White));
@@ -55,8 +54,14 @@ class ChessService {
     }
 
     public movePiece(from: [number, number], to: [number, number]): boolean {
-        // Implement the logic to move a piece
-        return true;
+        const piece = this.board[from[0]][from[1]];
+        if (piece) {
+            this.board[to[0]][to[1]] = piece;
+            this.board[from[0]][from[1]] = null;
+            piece.move(to);
+            return true;
+        }
+        return false;
     }
 }
 
