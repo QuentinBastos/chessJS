@@ -6,13 +6,13 @@ import { Game } from "../models/game.model";
 export class GameService {
 
     public async getAllGames(): Promise<GameOutputDTO[]> {
-        let gameList = await Game.findAll();
+        const gameList = await Game.findAll();
         return GameMapper.toOutputDtoList(gameList);
     }
 
 
     public async getGameById(id: number): Promise<GameOutputDTO> {
-        let game = await Game.findByPk(id);
+        const game = await Game.findByPk(id);
         if (game) {
             return GameMapper.toOutputDto(game);
         } else {

@@ -13,6 +13,6 @@ export class ChessFigure {
     }
 
     move(toPosition: [number, number]): void {
-        // Implement move logic
+        this.position = toPosition;
     }
 }
