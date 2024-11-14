@@ -1,15 +1,15 @@
 import { ChessFigure, Rook, Knight, Bishop, Queen, King, Pawn, ChessColor } from '../interface';
 
 class ChessService {
-    private readonly board: ChessFigure[][];
+    private readonly board: (ChessFigure | null)[][];
 
     constructor() {
         this.board = this.createEmptyBoard();
         this.initializeStandardChess();
     }
 
-    private createEmptyBoard(): ChessFigure[][] {
-        const board: ChessFigure[][] = [];
+    private createEmptyBoard(): (ChessFigure | null)[][] {
+        const board: (ChessFigure | null)[][] = [];
         for (let i = 0; i < 8; i++) {
             board[i] = new Array(8).fill(null);
         }
@@ -49,11 +49,15 @@ class ChessService {
         this.board[file][rank] = piece;
     }
 
-    public getBoard(): ChessFigure[][] {
+    public getBoard(): (ChessFigure | null)[][] {
         return this.board;
     }
 
     public movePiece(from: [number, number], to: [number, number]): boolean {
+        if (!this.isValidPosition(to)) {
+            return false;
+        }
+
         const piece = this.board[from[0]][from[1]];
         if (piece) {
             this.board[to[0]][to[1]] = piece;
@@ -62,6 +66,24 @@ class ChessService {
             return true;
         }
         return false;
+    }
+
+    public deletePiece(position: [number, number]): boolean {
+        if (!this.isValidPosition(position)) {
+            return false;
+        }
+
+        const [file, rank] = position;
+        if (this.board[file][rank] !== null) {
+            this.board[file][rank] = null;
+            return true;
+        }
+        return false;
+    }
+
+    private isValidPosition(position: [number, number]): boolean {
+        const [file, rank] = position;
+        return file >= 0 && file < 8 && rank >= 0 && rank < 8;
     }
 }
 

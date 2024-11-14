@@ -18,9 +18,6 @@ export class Queen extends ChessFigure {
         ) {
             // Valid move for the queen
             this.position = toPosition;
-            console.log('Queen moved to', toPosition);
-        } else {
-            console.log('Invalid move for the queen');
         }
     }
 }
