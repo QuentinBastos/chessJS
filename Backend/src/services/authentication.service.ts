@@ -36,7 +36,6 @@ export class AuthenticationService {
             username: username,
             scopes: permissions,
         };
-        console.log(permissions)
         return jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
     }
 }

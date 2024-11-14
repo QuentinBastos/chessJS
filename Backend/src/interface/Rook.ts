@@ -14,9 +14,6 @@ export class Rook extends ChessFigure {
             targetRank === currentRank
         ) {
             this.position = toPosition;
-            console.log('Rook moved to', toPosition);
-        } else {
-            console.log('Invalid move for the rook');
         }
     }
 }

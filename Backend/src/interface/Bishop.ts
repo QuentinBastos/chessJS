@@ -13,9 +13,6 @@ export class Bishop extends ChessFigure {
 
         if (fileDiff === rankDiff) {
             this.position = toPosition;
-            console.log('Bishop moved to', toPosition);
-        } else {
-            console.log('Invalid move for the bishop');
         }
     }
 }

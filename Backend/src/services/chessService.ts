@@ -54,6 +54,10 @@ class ChessService {
     }
 
     public movePiece(from: [number, number], to: [number, number]): boolean {
+        if (!this.isValidPosition(to)) {
+            return false;
+        }
+
         const piece = this.board[from[0]][from[1]];
         if (piece) {
             this.board[to[0]][to[1]] = piece;
@@ -62,6 +66,24 @@ class ChessService {
             return true;
         }
         return false;
+    }
+
+    public deletePiece(position: [number, number]): boolean {
+        if (!this.isValidPosition(position)) {
+            return false;
+        }
+
+        const [file, rank] = position;
+        if (this.board[file][rank] !== null) {
+            this.board[file][rank] = null;
+            return true;
+        }
+        return false;
+    }
+
+    private isValidPosition(position: [number, number]): boolean {
+        const [file, rank] = position;
+        return file >= 0 && file < 8 && rank >= 0 && rank < 8;
     }
 }
 

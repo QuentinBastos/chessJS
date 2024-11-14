@@ -13,9 +13,6 @@ export class King extends ChessFigure {
 
         if (fileDiff <= 1 && rankDiff <= 1) {
             this.position = toPosition;
-            console.log('King moved to', toPosition);
-        } else {
-            console.log('Invalid move for the king');
         }
     }
 }

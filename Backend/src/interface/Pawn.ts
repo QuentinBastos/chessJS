@@ -13,9 +13,6 @@ export class Pawn extends ChessFigure {
 
         if (rankDiff === 1 && fileDiff === 0) {
             this.position = toPosition;
-            console.log('Pawn moved to', toPosition);
-        } else {
-            console.log('Invalid move for the pawn');
         }
     }
 }
