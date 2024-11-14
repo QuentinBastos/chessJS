@@ -6,7 +6,7 @@
     "start": "tsc && node dist/app.js",
     "lint": "eslint .. --ext .ts",
     "test": "jest",
-    "generate": "npx tsoa:routes && npx tsoa:spec",
+    "generate": "npx tsoa routes && npx tsoa spec",
     "predev": "npm run swagger"
   },
   "nodemonConfig": {
