@@ -1,17 +1,17 @@
 import {ChessColor, ChessFigure} from "./ChessFigure";
 
 export class Knight extends ChessFigure {
-    constructor(id: number, position: [number, number], color: ChessColor) {
-        super(id, position, color);
+    constructor(id: number, type: number, position: [number, number], color: ChessColor) {
+        super(id, type, position, color);
     }
 
-    move(toPosition: [number, number], board: (ChessFigure | null)[][]): void {
+    move(toPosition: [number, number], board: ChessFigure[][]): void {
         if (this.isValidMove(toPosition, board)) {
             this.position = toPosition;
         }
     }
 
-    isValidMove(to: [number, number], board: (ChessFigure | null)[][]): boolean {
+    isValidMove(to: [number, number], board: ChessFigure[][]): boolean {
         const [targetFile, targetRank] = to;
         const [currentFile, currentRank] = this.position;
         const fileDiff = Math.abs(targetFile - currentFile);

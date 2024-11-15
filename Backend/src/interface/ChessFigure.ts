@@ -5,11 +5,13 @@ export enum ChessColor {
 
 export abstract class ChessFigure {
     id: number;
+    type: number;
     position: [number, number];
     color: ChessColor;
 
-    protected constructor(id: number, position: [number, number], color: ChessColor) {
+    protected constructor(id: number, type: number,  position: [number, number], color: ChessColor) {
         this.id = id;
+        this.type = type;
         this.position = position;
         this.color = color;
     }
@@ -18,5 +20,5 @@ export abstract class ChessFigure {
         this.position = toPosition;
     }
 
-    abstract isValidMove(to: [number, number], board: (ChessFigure | null)[][]): boolean;
+    abstract isValidMove(toPosition: [number, number], board: (ChessFigure|null)[][]): boolean;
 }

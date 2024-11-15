@@ -7,14 +7,14 @@
         <div
           v-for="(cell, cellIndex) in row"
           :key="cellIndex"
-          class="cell"
+          :class="['cell', { 'highlight': isHighlighted(rowIndex, cellIndex) }]"
           @drop="onDrop($event, rowIndex, cellIndex)"
           @dragover="onDragOver($event)"
         >
           <img
             class="piece"
             v-if="cell"
-            :src="getImageSrc(cell.id, cell.color)"
+            :src="getImageSrc(cell.type, cell.color)"
             :alt="`Piece ${cell.id}`"
             :draggable="cell.color === currentTurn"
             @dragstart="onDragStart($event, rowIndex, cellIndex)"
@@ -27,9 +27,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import {defineComponent, ref} from 'vue';
 import axios from 'axios';
-import { ChessFigure, ChessColor } from '@/../../Backend/src/interface/ChessFigure';
+import {ChessFigure, ChessColor} from '@/../../Backend/src/interface/ChessFigure';
 
 export default defineComponent({
   name: 'ChessBoardLogger',
@@ -37,26 +37,51 @@ export default defineComponent({
     const board = ref<(ChessFigure | null)[][] | null>(null);
     const draggedPiece = ref<{ row: number; col: number } | null>(null);
     const currentTurn = ref<ChessColor>(ChessColor.White);
+    const highlightedMoves = ref<[number, number][]>([]);
 
     const logBoard = async () => {
       try {
         const response = await axios.get('http://localhost:8000/api/board');
         board.value = response.data;
-        console.log(board.value);
       } catch (error) {
         console.error('Error fetching board:', error);
       }
     };
 
-    const getImageSrc = (id: number, color: string): string => {
+    const getPossibleMoves = async (pieceId: string) => {
+      try {
+        const response = await axios.get(`http://localhost:8000/api/possible-moves/${pieceId}`);
+        return response.data;
+      } catch (error: unknown) {
+        console.error('Error fetching possible moves:', error);
+        return [];
+      }
+    };
+
+    const movePiece = async (pieceId: number, toPosition: [number, number]) => {
+      try {
+        console.log('Sending move request:', { pieceId, toPosition });
+        const response = await axios.post('http://localhost:8000/api/move-piece', {
+          pieceId,
+          toPosition
+        });
+        console.log('Move successful:', response.data);
+        return response.data;
+      } catch (error) {
+        console.error('Error moving piece:', error.response?.data || error.message);
+        throw error;
+      }
+    };
+
+    const getImageSrc = (type: number, color: string): string => {
       const pieceColor = color.toLowerCase();
-      return `/images/pieces/${pieceColor}_${id}.png`;
+      return `/images/pieces/${pieceColor}_${type}.png`;
     };
 
     const onDragStart = (event: DragEvent, row: number, col: number) => {
       const piece = board.value![row][col];
       if (piece && piece.color === currentTurn.value) {
-        draggedPiece.value = { row, col };
+        draggedPiece.value = {row, col};
       } else {
         event.preventDefault();
       }
@@ -68,6 +93,7 @@ export default defineComponent({
 
     const onDrop = (event: DragEvent, row: number, col: number) => {
       event.preventDefault();
+      //TODO move piece by calling the movePiece function here
       if (draggedPiece.value) {
         const fromRow = draggedPiece.value.row;
         const fromCol = draggedPiece.value.col;
@@ -78,27 +104,19 @@ export default defineComponent({
           currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
         }
         draggedPiece.value = null;
+        highlightedMoves.value = [];
       }
     };
 
-    const getPossibleMoves = (piece: ChessFigure, board: (ChessFigure | null)[][]): [number, number][] => {
-      const possibleMoves: [number, number][] = [];
-      for (let row = 0; row < board.length; row++) {
-        for (let col = 0; col < board[row].length; col++) {
-          if (piece.isValidMove([row, col], board)) {
-            possibleMoves.push([row, col]);
-          }
-        }
-      }
-      return possibleMoves;
+    const onPieceClick = async (piece: ChessFigure) => {
+      console.log('Piece clicked:', piece.id);
+      const possibleMoves = await getPossibleMoves(piece.id.toString());
+      console.log('Possible moves:', possibleMoves);
+      highlightedMoves.value = possibleMoves;
     };
 
-    const onPieceClick = (piece: ChessFigure) => {
-      console.log("test");
-      if (piece.color === currentTurn.value) {
-        const possibleMoves = getPossibleMoves(piece, board.value!);
-        console.log('Possible moves:', possibleMoves);
-      }
+    const isHighlighted = (row: number, col: number): boolean => {
+      return highlightedMoves.value.some(move => move[0] === row && move[1] === col);
     };
 
     return {
@@ -111,6 +129,8 @@ export default defineComponent({
       currentTurn,
       onPieceClick,
       getPossibleMoves,
+      isHighlighted,
+      movePiece,
     };
   },
 });
@@ -147,5 +167,9 @@ export default defineComponent({
 .piece {
   height: 40px;
   width: 40px;
+}
+
+.highlight {
+  background-color: yellow;
 }
 </style>
