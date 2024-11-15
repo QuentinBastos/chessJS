@@ -1,24 +1,42 @@
 <template>
   <div>
     <button @click="logBoard">Log Board</button>
+    <p>Current Turn: {{ currentTurn }}</p>
     <div class="chessboard">
       <div v-for="(row, rowIndex) in board" :key="rowIndex" class="row">
-        <div v-for="(cell, cellIndex) in row" :key="cellIndex" class="cell">
-          <img class="piece" v-if="cell" :src="getImageSrc(cell.id, cell.color)" :alt="`Piece ${cell.id}`" />
+        <div
+          v-for="(cell, cellIndex) in row"
+          :key="cellIndex"
+          class="cell"
+          @drop="onDrop($event, rowIndex, cellIndex)"
+          @dragover="onDragOver($event)"
+        >
+          <img
+            class="piece"
+            v-if="cell"
+            :src="getImageSrc(cell.id, cell.color)"
+            :alt="`Piece ${cell.id}`"
+            :draggable="cell.color === currentTurn"
+            @dragstart="onDragStart($event, rowIndex, cellIndex)"
+            @click="onPieceClick(cell)"
+          />
         </div>
       </div>
     </div>
   </div>
 </template>
+
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import axios from 'axios';
-import { ChessFigure } from '@/../../Backend/src/interface/ChessFigure';
+import { ChessFigure, ChessColor } from '@/../../Backend/src/interface/ChessFigure';
 
 export default defineComponent({
   name: 'ChessBoardLogger',
   setup() {
     const board = ref<(ChessFigure | null)[][] | null>(null);
+    const draggedPiece = ref<{ row: number; col: number } | null>(null);
+    const currentTurn = ref<ChessColor>(ChessColor.White);
 
     const logBoard = async () => {
       try {
@@ -35,10 +53,64 @@ export default defineComponent({
       return `/images/pieces/${pieceColor}_${id}.png`;
     };
 
+    const onDragStart = (event: DragEvent, row: number, col: number) => {
+      const piece = board.value![row][col];
+      if (piece && piece.color === currentTurn.value) {
+        draggedPiece.value = { row, col };
+      } else {
+        event.preventDefault();
+      }
+    };
+
+    const onDragOver = (event: DragEvent) => {
+      event.preventDefault();
+    };
+
+    const onDrop = (event: DragEvent, row: number, col: number) => {
+      event.preventDefault();
+      if (draggedPiece.value) {
+        const fromRow = draggedPiece.value.row;
+        const fromCol = draggedPiece.value.col;
+        if (fromCol !== col) {
+          const piece = board.value![fromRow][fromCol];
+          board.value![fromRow][fromCol] = null;
+          board.value![row][col] = piece;
+          currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
+        }
+        draggedPiece.value = null;
+      }
+    };
+
+    const getPossibleMoves = (piece: ChessFigure, board: (ChessFigure | null)[][]): [number, number][] => {
+      const possibleMoves: [number, number][] = [];
+      for (let row = 0; row < board.length; row++) {
+        for (let col = 0; col < board[row].length; col++) {
+          if (piece.isValidMove([row, col], board)) {
+            possibleMoves.push([row, col]);
+          }
+        }
+      }
+      return possibleMoves;
+    };
+
+    const onPieceClick = (piece: ChessFigure) => {
+      console.log("test");
+      if (piece.color === currentTurn.value) {
+        const possibleMoves = getPossibleMoves(piece, board.value!);
+        console.log('Possible moves:', possibleMoves);
+      }
+    };
+
     return {
       board,
       logBoard,
       getImageSrc,
+      onDragStart,
+      onDragOver,
+      onDrop,
+      currentTurn,
+      onPieceClick,
+      getPossibleMoves,
     };
   },
 });
@@ -76,5 +148,4 @@ export default defineComponent({
   height: 40px;
   width: 40px;
 }
-
 </style>

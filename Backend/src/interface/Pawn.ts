@@ -1,14 +1,9 @@
+// Pawn.ts
 import { ChessColor, ChessFigure } from "./ChessFigure";
 
 export class Pawn extends ChessFigure {
     constructor(id: number, position: [number, number], color: ChessColor) {
         super(id, position, color);
-    }
-
-    move(toPosition: [number, number], board: (ChessFigure | null)[][]): void {
-        if (this.isValidMove(toPosition, board)) {
-            this.position = toPosition;
-        }
     }
 
     isValidMove(to: [number, number], board: (ChessFigure | null)[][]): boolean {
