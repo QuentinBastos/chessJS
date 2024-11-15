@@ -2,11 +2,14 @@ export enum ChessColor {
     White = "white",
     Black = "black",
 }
+
 export abstract class ChessFigure {
+    id: number;
     position: [number, number];
     color: ChessColor;
 
-    protected constructor(position: [number, number], color: ChessColor) {
+    protected constructor(id: number, position: [number, number], color: ChessColor) {
+        this.id = id;
         this.position = position;
         this.color = color;
     }

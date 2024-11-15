@@ -1,8 +1,8 @@
 import { ChessColor, ChessFigure } from "./ChessFigure";
 
 export class Bishop extends ChessFigure {
-    constructor(position: [number, number], color: ChessColor) {
-        super(position, color);
+    constructor(id: number, position: [number, number], color: ChessColor) {
+        super(id, position, color);
     }
 
     move(toPosition: [number, number], board: (ChessFigure | null)[][]): void {

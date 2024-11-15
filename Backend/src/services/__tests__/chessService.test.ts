@@ -1,5 +1,6 @@
 import ChessService from '../chessService';
 import { ChessColor, Pawn } from '../../interface';
+import {PAWN} from "../../constants";
 
 describe('ChessService', () => {
     let chessService: ChessService;
@@ -71,7 +72,7 @@ describe('ChessService', () => {
     });
 
     test('should check if a piece cannot be deleted', () => {
-        const piece = new Pawn([0, 2], ChessColor.White); // New pawn not on the board
+        const piece = new Pawn(PAWN, [0, 2], ChessColor.White); // New pawn not on the board
         const position: [number, number] = [0, 1];
         const canDelete = chessService.checkDelete(piece, position);
         expect(canDelete).toBe(false);

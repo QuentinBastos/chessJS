@@ -1,4 +1,5 @@
-import { ChessFigure, Rook, Knight, Bishop, Queen, King, Pawn, ChessColor } from '../interface';
+import {ChessFigure, Rook, Knight, Bishop, Queen, King, Pawn, ChessColor} from '../interface';
+import {ROOK, KNIGHT, BISHOP, QUEEN, KING, PAWN} from '../constants';
 
 class ChessService {
     private readonly board: (ChessFigure | null)[][];
@@ -17,30 +18,30 @@ class ChessService {
     }
 
     private initializeStandardChess(): void {
-        this.placePiece(new Rook([0, 0], ChessColor.White));
-        this.placePiece(new Knight([1, 0], ChessColor.White));
-        this.placePiece(new Bishop([2, 0], ChessColor.White));
-        this.placePiece(new Queen([3, 0], ChessColor.White));
-        this.placePiece(new King([4, 0], ChessColor.White));
-        this.placePiece(new Bishop([5, 0], ChessColor.White));
-        this.placePiece(new Knight([6, 0], ChessColor.White));
-        this.placePiece(new Rook([7, 0], ChessColor.White));
+        this.placePiece(new Rook(ROOK, [0, 0], ChessColor.White));
+        this.placePiece(new Knight(KNIGHT, [1, 0], ChessColor.White));
+        this.placePiece(new Bishop(BISHOP, [2, 0], ChessColor.White));
+        this.placePiece(new Queen(QUEEN, [3, 0], ChessColor.White));
+        this.placePiece(new King(KING, [4, 0], ChessColor.White));
+        this.placePiece(new Bishop(BISHOP, [5, 0], ChessColor.White));
+        this.placePiece(new Knight(KNIGHT, [6, 0], ChessColor.White));
+        this.placePiece(new Rook(ROOK, [7, 0], ChessColor.White));
 
         for (let i = 0; i < 8; i++) {
-            this.placePiece(new Pawn([i, 1], ChessColor.White));
+            this.placePiece(new Pawn(PAWN, [i, 1], ChessColor.White));
         }
 
-        this.placePiece(new Rook([0, 7], ChessColor.Black));
-        this.placePiece(new Knight([1, 7], ChessColor.Black));
-        this.placePiece(new Bishop([2, 7], ChessColor.Black));
-        this.placePiece(new Queen([3, 7], ChessColor.Black));
-        this.placePiece(new King([4, 7], ChessColor.Black));
-        this.placePiece(new Bishop([5, 7], ChessColor.Black));
-        this.placePiece(new Knight([6, 7], ChessColor.Black));
-        this.placePiece(new Rook([7, 7], ChessColor.Black));
+        this.placePiece(new Rook(ROOK, [0, 7], ChessColor.Black));
+        this.placePiece(new Knight(KNIGHT, [1, 7], ChessColor.Black));
+        this.placePiece(new Bishop(BISHOP, [2, 7], ChessColor.Black));
+        this.placePiece(new Queen(QUEEN, [3, 7], ChessColor.Black));
+        this.placePiece(new King(KING, [4, 7], ChessColor.Black));
+        this.placePiece(new Bishop(BISHOP, [5, 7], ChessColor.Black));
+        this.placePiece(new Knight(KNIGHT, [6, 7], ChessColor.Black));
+        this.placePiece(new Rook(ROOK, [7, 7], ChessColor.Black));
 
         for (let i = 0; i < 8; i++) {
-            this.placePiece(new Pawn([i, 6], ChessColor.Black));
+            this.placePiece(new Pawn(PAWN, [i, 6], ChessColor.Black));
         }
     }
 
