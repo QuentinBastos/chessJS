@@ -31,6 +31,12 @@ export class Bishop extends ChessFigure {
             }
         }
 
-        return true;
+        const targetPiece = board[toFile][toRank];
+        // Check if the target position is occupied by a piece of the same color
+        if (targetPiece === null || targetPiece.color !== this.color) {
+            return true;
+        }
+
+        return false;
     }
 }

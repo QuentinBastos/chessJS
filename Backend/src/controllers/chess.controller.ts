@@ -23,16 +23,18 @@ export const getPossibleMoves = (req: Request, res: Response) => {
 };
 
 export const movePiece = (req: Request, res: Response) => {
-    const pieceId = parseInt(req.body.pieceId, 10);
-    const toPosition: [number, number] = req.body.toPosition;
+    const { pieceId, toPosition } = req.body;
+    const moveResult = chessService.movePiece(pieceId, toPosition);
 
-    console.log('Received move request:', { pieceId, toPosition });
-
-    const result = chessService.movePiece(pieceId, toPosition);
-
-    if (!result.success) {
-        return res.status(400).json({ message: result.message });
+    if (moveResult.success) {
+        res.json({
+            success: true,
+            board: chessService.getBoard(),
+        });
+    } else {
+        res.json({
+            success: false,
+            message: moveResult.message,
+        });
     }
-
-    res.json(result.board);
 };

@@ -78,10 +78,12 @@ export default defineComponent({
       return `/images/pieces/${pieceColor}_${type}.png`;
     };
 
-    const onDragStart = (event: DragEvent, row: number, col: number) => {
+    const onDragStart = async (event: DragEvent, row: number, col: number) => {
       const piece = board.value![row][col];
       if (piece && piece.color === currentTurn.value) {
-        draggedPiece.value = {row, col};
+        draggedPiece.value = { row, col };
+        const possibleMoves = await getPossibleMoves(piece.id.toString());
+        highlightedMoves.value = possibleMoves;
       } else {
         event.preventDefault();
       }
@@ -91,28 +93,40 @@ export default defineComponent({
       event.preventDefault();
     };
 
-    const onDrop = (event: DragEvent, row: number, col: number) => {
+    const onDrop = async (event: DragEvent, row: number, col: number) => {
       event.preventDefault();
-      //TODO move piece by calling the movePiece function here
       if (draggedPiece.value) {
         const fromRow = draggedPiece.value.row;
         const fromCol = draggedPiece.value.col;
-        if (fromCol !== col) {
-          const piece = board.value![fromRow][fromCol];
-          board.value![fromRow][fromCol] = null;
-          board.value![row][col] = piece;
-          currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
+        const pieceId = board.value![fromRow][fromCol]?.id;
+        const toPosition: [number, number] = [row, col];
+
+        if (pieceId === undefined) {
+          alert('Invalid piece');
+          return;
         }
+
+        try {
+          const response = await movePiece(pieceId, toPosition);
+          if (response && response.success) {
+            board.value = response.board;
+            currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
+          }
+        } catch (error) {
+          console.error('Error moving piece:', error);
+          alert('Error moving piece: ' + JSON.stringify(error.response?.data || error.message));
+        }
+
         draggedPiece.value = null;
         highlightedMoves.value = [];
       }
     };
 
     const onPieceClick = async (piece: ChessFigure) => {
-      console.log('Piece clicked:', piece.id);
-      const possibleMoves = await getPossibleMoves(piece.id.toString());
-      console.log('Possible moves:', possibleMoves);
-      highlightedMoves.value = possibleMoves;
+      if (piece.color === currentTurn.value) {
+        const possibleMoves = await getPossibleMoves(piece.id.toString());
+        highlightedMoves.value = possibleMoves;
+      }
     };
 
     const isHighlighted = (row: number, col: number): boolean => {
