@@ -1,36 +1,36 @@
 <template>
   <aside class="bg-neutral-900 w-[13%] min-w-[200px] h-full relative overflow-y-auto ">
     <div class="flex items-center py-2 px-3 hover:bg-neutral-600">
-      <img src="/img/icons/chess.png" alt="LocalChess" class="w-[48px]">
+      <img src="/images/icons/chess.png" alt="LocalChess" class="w-[48px]">
       <p class="text-white font-bold text-2xl">LocalChess</p>
     </div>
     <ul class="flex flex-col text-white font-bold text-lg">
       <li class="flex items-center gap-4 px-3 py-2 hover:bg-neutral-600 cursor-pointer">
-        <img src="/img/icons/strategy.png" alt="LocalChess" class="w-[36px]">
+        <img src="/images/icons/strategy.png" alt="LocalChess" class="w-[36px]">
         <p>Jouer</p>
       </li>
       <li class="flex items-center gap-4 px-3 py-2 hover:bg-neutral-600 cursor-pointer">
-        <img src="/img/icons/jigsaw.png" alt="LocalChess" class="w-[36px]">
+        <img src="/images/icons/jigsaw.png" alt="LocalChess" class="w-[36px]">
         <p>Problèmes</p>
       </li>
       <li class="flex items-center gap-4 px-3 py-2 hover:bg-neutral-600 cursor-pointer">
-        <img src="/img/icons/education.png" alt="LocalChess" class="w-[36px]">
+        <img src="/images/icons/education.png" alt="LocalChess" class="w-[36px]">
         <p>Apprendre</p>
       </li>
       <li class="flex items-center gap-4 px-3 py-2 hover:bg-neutral-600 cursor-pointer">
-        <img src="/img/icons/binoculars.png" alt="LocalChess" class="w-[36px]">
-        <p>Regarder</p>
+        <img src="/images/icons/binoculars.png" alt="LocalChess" class="w-[36px]">
+        <p>Historique</p>
       </li>
       <li class="flex items-center gap-4 px-3 py-2 hover:bg-neutral-600 cursor-pointer">
-        <img src="/img/icons/newspaper.png" alt="LocalChess" class="w-[36px]">
+        <img src="/images/icons/newspaper.png" alt="LocalChess" class="w-[36px]">
         <p>Info</p>
       </li>
       <li class="flex items-center gap-4 px-3 py-2 hover:bg-neutral-600 cursor-pointer">
-        <img src="/img/icons/social-care.png" alt="LocalChess" class="w-[36px]">
+        <img src="/images/icons/social-care.png" alt="LocalChess" class="w-[36px]">
         <p>Social</p>
       </li>
       <li class="flex items-center gap-4 px-3 py-2 hover:bg-neutral-600 cursor-pointer">
-        <img src="/img/icons/more.png" alt="LocalChess" class="w-[36px]">
+        <img src="/images/icons/more.png" alt="LocalChess" class="w-[36px]">
         <p>Plus</p>
       </li>
     </ul>
@@ -47,15 +47,15 @@
     </div>
     <ul class="flex flex-col text-gray-400 font-bold">
       <li class="flex items-center gap-4 px-3 py-2 hover:bg-neutral-600 cursor-pointer">
-        <img src="/img/icons/dark-mode.png" alt="LocalChess" class="w-[24px]">
+        <img src="/images/icons/dark-mode.png" alt="LocalChess" class="w-[24px]">
         <p>Interface</p>
       </li>
       <li class="flex items-center gap-4 px-3 py-2 hover:bg-neutral-600 cursor-pointer">
-        <img src="/img/icons/globe.png" alt="LocalChess" class="w-[24px]">
+        <img src="/images/icons/globe.png" alt="LocalChess" class="w-[24px]">
         <p>Langues</p>
       </li>
       <li class="flex items-center gap-4 px-3 py-2 hover:bg-neutral-600 cursor-pointer">
-        <img src="/img/icons/headset.png" alt="LocalChess" class="w-[24px]">
+        <img src="/images/icons/headset.png" alt="LocalChess" class="w-[24px]">
         <p>Assitance</p>
       </li>
     </ul>

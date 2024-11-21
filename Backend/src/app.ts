@@ -1,8 +1,8 @@
 import express, { Application } from "express";
-import cors from 'cors'; // Importer le middleware CORS
+import cors from 'cors';
 import swaggerUi from "swagger-ui-express";
 
-import { RegisterRoutes } from "./routes/index"; // tsoa va générer ce fichier
+import { RegisterRoutes } from "./routes/index";
 import errorHandler from "./middlewares/errorHandler";
 import chessRoutes from './routes/chessRoutes';
 import dotenv from 'dotenv';
