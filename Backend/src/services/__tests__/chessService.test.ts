@@ -1,6 +1,5 @@
 import ChessService from '../chessService';
-import {ChessColor, Pawn} from '../../interface';
-import {PAWN} from "../../constants";
+import {ChessColor} from '../../interface';
 
 describe('ChessService', () => {
     let chessService: ChessService;
