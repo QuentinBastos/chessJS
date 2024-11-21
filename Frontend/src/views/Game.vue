@@ -29,7 +29,7 @@
 <script lang="ts">
 import {defineComponent, ref} from 'vue';
 import axios from 'axios';
-import {ChessFigure, ChessColor} from '@/../../Backend/src/interface/ChessFigure';
+import {ChessColor, ChessFigure} from '@/../../Backend/src/interface/ChessFigure';
 
 export default defineComponent({
   name: 'ChessBoardLogger',
@@ -41,7 +41,7 @@ export default defineComponent({
 
     const logBoard = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/board');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/board`);
         board.value = response.data;
       } catch (error) {
         console.error('Error fetching board:', error);
@@ -50,7 +50,7 @@ export default defineComponent({
 
     const getPossibleMoves = async (pieceId: string) => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/possible-moves/${pieceId}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/possible-moves/${pieceId}`);
         return response.data;
       } catch (error: unknown) {
         console.error('Error fetching possible moves:', error);
@@ -61,7 +61,7 @@ export default defineComponent({
     const movePiece = async (pieceId: number, toPosition: [number, number]) => {
       try {
         console.log('Sending move request:', { pieceId, toPosition });
-        const response = await axios.post('http://localhost:8000/api/move-piece', {
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/move-piece`, {
           pieceId,
           toPosition
         });
@@ -82,8 +82,7 @@ export default defineComponent({
       const piece = board.value![row][col];
       if (piece && piece.color === currentTurn.value) {
         draggedPiece.value = { row, col };
-        const possibleMoves = await getPossibleMoves(piece.id.toString());
-        highlightedMoves.value = possibleMoves;
+        highlightedMoves.value = await getPossibleMoves(piece.id.toString());
       } else {
         event.preventDefault();
       }
@@ -124,8 +123,7 @@ export default defineComponent({
 
     const onPieceClick = async (piece: ChessFigure) => {
       if (piece.color === currentTurn.value) {
-        const possibleMoves = await getPossibleMoves(piece.id.toString());
-        highlightedMoves.value = possibleMoves;
+        highlightedMoves.value = await getPossibleMoves(piece.id.toString());
       }
     };
 

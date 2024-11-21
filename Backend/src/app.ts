@@ -4,13 +4,16 @@ import swaggerUi from "swagger-ui-express";
 import { RegisterRoutes } from "./routes/index"; // tsoa va générer ce fichier
 import errorHandler from "./middlewares/errorHandler";
 import chessRoutes from './routes/chessRoutes';
+import dotenv from 'dotenv';
 
-const PORT = 8000;
+dotenv.config();
+
+const PORT = process.env.PORT || 8000;
 const app: Application = express();
 
 // Configure CORS to allow requests from your frontend
 app.use(cors({
-    origin: 'http://localhost:5173' // Adjust the origin to match your frontend's URL
+    origin: process.env.FRONTEND_URL,
 }));
 
 app.use(express.json());
