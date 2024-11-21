@@ -26,8 +26,12 @@ export class UserService {
         password: string,
         rank: number,
     ): Promise<UserOutputDTO> {
+        const encodedPassword = Buffer.from(password).toString("base64");
+
         return UserMapper.toOutputDto(
-            await User.create({ username: username ,email: email ,password: password, rank: rank }),
+            await User.create({
+                username: username, email: email, password: encodedPassword, rank: rank
+            }),
         );
     }
 

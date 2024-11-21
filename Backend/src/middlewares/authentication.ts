@@ -12,7 +12,7 @@ export function expressAuthentication(
             request.query.token ||
             request.headers["authorization"]?.split(' ')[1];
 
-        console.log("Extracted Token: ", token);  // Log the extracted token
+        console.log("Extracted Token: ", token);
 
         return new Promise((resolve, reject) => {
             if (!token) {
