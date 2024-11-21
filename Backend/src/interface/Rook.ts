@@ -5,22 +5,14 @@ export class Rook extends ChessFigure {
         super(id, type, position, color);
     }
 
-    move(toPosition: [number, number], board: ChessFigure[][]): void {
-        if (this.isValidMove(toPosition, board)) {
-            this.position = toPosition;
-        }
-    }
-
     isValidMove(to: [number, number], board: ChessFigure[][]): boolean {
         const [fromFile, fromRank] = this.position;
         const [toFile, toRank] = to;
 
-        // Rook can move horizontally or vertically
         if (fromFile !== toFile && fromRank !== toRank) {
             return false;
         }
 
-        // Check if the path is clear
         if (fromFile === toFile) {
             const step = fromRank < toRank ? 1 : -1;
             for (let rank = fromRank + step; rank !== toRank; rank += step) {
@@ -38,10 +30,6 @@ export class Rook extends ChessFigure {
         }
 
         const targetPiece = board[toFile][toRank];
-        // Check if the target position is occupied by a piece of the same color
-        if (targetPiece === null || targetPiece.color !== this.color) {
-            return true;
-        }
-        return false;
+        return targetPiece === null || targetPiece.color !== this.color;
     }
 }

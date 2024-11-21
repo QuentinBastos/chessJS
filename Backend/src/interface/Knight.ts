@@ -5,12 +5,6 @@ export class Knight extends ChessFigure {
         super(id, type, position, color);
     }
 
-    move(toPosition: [number, number], board: ChessFigure[][]): void {
-        if (this.isValidMove(toPosition, board)) {
-            this.position = toPosition;
-        }
-    }
-
     isValidMove(to: [number, number], board: ChessFigure[][]): boolean {
         const [targetFile, targetRank] = to;
         const [currentFile, currentRank] = this.position;
@@ -25,7 +19,6 @@ export class Knight extends ChessFigure {
                 return true;
             }
         }
-
         return false;
     }
 }

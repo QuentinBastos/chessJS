@@ -5,12 +5,6 @@ export class Bishop extends ChessFigure {
         super(id, type, position, color);
     }
 
-    move(toPosition: [number, number], board: ChessFigure[][]): void {
-        if (this.isValidMove(toPosition, board)) {
-            this.position = toPosition;
-        }
-    }
-
     isValidMove(to: [number, number], board: ChessFigure[][]): boolean {
         const [fromFile, fromRank] = this.position;
         const [toFile, toRank] = to;
@@ -32,11 +26,6 @@ export class Bishop extends ChessFigure {
         }
 
         const targetPiece = board[toFile][toRank];
-        // Check if the target position is occupied by a piece of the same color
-        if (targetPiece === null || targetPiece.color !== this.color) {
-            return true;
-        }
-
-        return false;
+        return targetPiece === null || targetPiece.color !== this.color;
     }
 }

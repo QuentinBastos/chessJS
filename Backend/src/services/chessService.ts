@@ -74,7 +74,7 @@ class ChessService {
         for (let row = 0; row < this.board.length; row++) {
             for (let col = 0; col < this.board[row].length; col++) {
                 const toPosition: [number, number] = [row, col];
-                if (piece.isValidMove(toPosition, this.board)) {
+                if (piece.isValidMove(toPosition, this.board) && piece.isKingSafeAfterMove(toPosition, this.board)) {
                     availablePositions.push(toPosition);
                 }
             }
@@ -96,7 +96,7 @@ class ChessService {
         const [toFile, toRank] = to;
         const [fromFile, fromRank] = piece.position;
 
-        if (!piece.isValidMove(to, this.board)) {
+        if (!piece.isValidMove(to, this.board) || !piece.isKingSafeAfterMove(to, this.board)) {
             return {success: false, message: 'Invalid move'};
         }
 
