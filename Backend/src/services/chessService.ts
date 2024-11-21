@@ -1,4 +1,5 @@
-import { ChessFigure, Rook, Knight, Bishop, Queen, King, Pawn, ChessColor } from '../interface';
+import {ChessFigure, Rook, Knight, Bishop, Queen, King, Pawn, ChessColor} from '../interface';
+import {ROOK, KNIGHT, BISHOP, QUEEN, KING, PAWN} from '../constants';
 
 class ChessService {
     private readonly board: (ChessFigure | null)[][];
@@ -16,31 +17,33 @@ class ChessService {
         return board;
     }
 
-    private initializeStandardChess(): void {
-        this.placePiece(new Rook([0, 0], ChessColor.White));
-        this.placePiece(new Knight([1, 0], ChessColor.White));
-        this.placePiece(new Bishop([2, 0], ChessColor.White));
-        this.placePiece(new Queen([3, 0], ChessColor.White));
-        this.placePiece(new King([4, 0], ChessColor.White));
-        this.placePiece(new Bishop([5, 0], ChessColor.White));
-        this.placePiece(new Knight([6, 0], ChessColor.White));
-        this.placePiece(new Rook([7, 0], ChessColor.White));
+    initializeStandardChess(): void {
+        let idCounter = 1;
+
+        this.placePiece(new Rook(idCounter++, ROOK, [0, 0], ChessColor.White));
+        this.placePiece(new Knight(idCounter++, KNIGHT, [1, 0], ChessColor.White));
+        this.placePiece(new Bishop(idCounter++, BISHOP, [2, 0], ChessColor.White));
+        this.placePiece(new Queen(idCounter++, QUEEN, [3, 0], ChessColor.White));
+        this.placePiece(new King(idCounter++, KING, [4, 0], ChessColor.White));
+        this.placePiece(new Bishop(idCounter++, BISHOP, [5, 0], ChessColor.White));
+        this.placePiece(new Knight(idCounter++, KNIGHT, [6, 0], ChessColor.White));
+        this.placePiece(new Rook(idCounter++, ROOK, [7, 0], ChessColor.White));
 
         for (let i = 0; i < 8; i++) {
-            this.placePiece(new Pawn([i, 1], ChessColor.White));
+            this.placePiece(new Pawn(idCounter++, PAWN, [i, 1], ChessColor.White));
         }
 
-        this.placePiece(new Rook([0, 7], ChessColor.Black));
-        this.placePiece(new Knight([1, 7], ChessColor.Black));
-        this.placePiece(new Bishop([2, 7], ChessColor.Black));
-        this.placePiece(new Queen([3, 7], ChessColor.Black));
-        this.placePiece(new King([4, 7], ChessColor.Black));
-        this.placePiece(new Bishop([5, 7], ChessColor.Black));
-        this.placePiece(new Knight([6, 7], ChessColor.Black));
-        this.placePiece(new Rook([7, 7], ChessColor.Black));
+        this.placePiece(new Rook(idCounter++, ROOK, [0, 7], ChessColor.Black));
+        this.placePiece(new Knight(idCounter++, KNIGHT, [1, 7], ChessColor.Black));
+        this.placePiece(new Bishop(idCounter++, BISHOP, [2, 7], ChessColor.Black));
+        this.placePiece(new Queen(idCounter++, QUEEN, [3, 7], ChessColor.Black));
+        this.placePiece(new King(idCounter++, KING, [4, 7], ChessColor.Black));
+        this.placePiece(new Bishop(idCounter++, BISHOP, [5, 7], ChessColor.Black));
+        this.placePiece(new Knight(idCounter++, KNIGHT, [6, 7], ChessColor.Black));
+        this.placePiece(new Rook(idCounter++, ROOK, [7, 7], ChessColor.Black));
 
         for (let i = 0; i < 8; i++) {
-            this.placePiece(new Pawn([i, 6], ChessColor.Black));
+            this.placePiece(new Pawn(idCounter++, PAWN, [i, 6], ChessColor.Black));
         }
     }
 
@@ -53,37 +56,59 @@ class ChessService {
         return this.board;
     }
 
-    public movePiece(from: [number, number], to: [number, number]): boolean {
-        if (!this.isValidPosition(to)) {
-            return false;
+    public getPieceById(id: number): ChessFigure | null {
+        for (let row = 0; row < this.board.length; row++) {
+            for (let col = 0; col < this.board[row].length; col++) {
+                const piece = this.board[row][col];
+                if (piece && piece.id === id) {
+                    return piece;
+                }
+            }
         }
-
-        const piece = this.board[from[0]][from[1]];
-        if (piece) {
-            this.board[to[0]][to[1]] = piece;
-            this.board[from[0]][from[1]] = null;
-            piece.move(to);
-            return true;
-        }
-        return false;
+        return null;
     }
 
-    public deletePiece(position: [number, number]): boolean {
-        if (!this.isValidPosition(position)) {
-            return false;
+    public checkMove(piece: ChessFigure): [number, number][] {
+        const availablePositions: [number, number][] = [];
+
+        for (let row = 0; row < this.board.length; row++) {
+            for (let col = 0; col < this.board[row].length; col++) {
+                const toPosition: [number, number] = [row, col];
+                if (piece.isValidMove(toPosition, this.board)) {
+                    availablePositions.push(toPosition);
+                }
+            }
         }
 
-        const [file, rank] = position;
-        if (this.board[file][rank] !== null) {
-            this.board[file][rank] = null;
-            return true;
-        }
-        return false;
+        return availablePositions;
     }
 
-    private isValidPosition(position: [number, number]): boolean {
-        const [file, rank] = position;
-        return file >= 0 && file < 8 && rank >= 0 && rank < 8;
+    public movePiece(pieceId: number, to: [number, number]): {
+        success: boolean,
+        message?: string,
+        board?: (ChessFigure | null)[][]
+    } {
+        const piece = this.getPieceById(pieceId);
+        if (!piece) {
+            return {success: false, message: 'Piece not found'};
+        }
+
+        const [toFile, toRank] = to;
+        const [fromFile, fromRank] = piece.position;
+
+        if (!piece.isValidMove(to, this.board)) {
+            return {success: false, message: 'Invalid move'};
+        }
+
+        try {
+            piece.move(to, this.board);
+            this.board[toFile][toRank] = piece;
+            this.board[fromFile][fromRank] = null;
+            return {success: true, board: this.board};
+        } catch (error) {
+            console.error('Error moving piece:', error);
+            return {success: false, message: 'Internal Server Error'};
+        }
     }
 }
 
