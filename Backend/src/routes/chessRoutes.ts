@@ -14,5 +14,10 @@ router.get('/possible-moves/:id', getPossibleMoves);
 
 router.post('/move-piece', movePiece);
 
+router.get('/isKingInCheck/:color', (req, res) => {
+    // TODO implement this route and do the check king is on check state
+    res.json(false);
+});
+
 
 export default router;

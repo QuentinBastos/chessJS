@@ -2,6 +2,9 @@
   <div>
     <button @click="logBoard">Log Board</button>
     <p>Current Turn: {{ currentTurn }}</p>
+    <div>
+      <div v-if="isKingInCheck">King is in check!</div>
+    </div>
     <div class="chessboard">
       <div v-for="(row, rowIndex) in board" :key="rowIndex" class="row">
         <div
@@ -27,9 +30,9 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref} from 'vue';
+import { defineComponent, ref } from 'vue';
 import axios from 'axios';
-import {ChessColor, ChessFigure} from '@/../../Backend/src/interface/ChessFigure';
+import { ChessColor, ChessFigure } from '@/../../Backend/src/interface/ChessFigure';
 
 export default defineComponent({
   name: 'ChessBoardLogger',
@@ -38,6 +41,7 @@ export default defineComponent({
     const draggedPiece = ref<{ row: number; col: number } | null>(null);
     const currentTurn = ref<ChessColor>(ChessColor.White);
     const highlightedMoves = ref<[number, number][]>([]);
+    const isKingInCheck = ref(false);
 
     const logBoard = async () => {
       try {
@@ -60,12 +64,10 @@ export default defineComponent({
 
     const movePiece = async (pieceId: number, toPosition: [number, number]) => {
       try {
-        console.log('Sending move request:', { pieceId, toPosition });
         const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/move-piece`, {
           pieceId,
           toPosition
         });
-        console.log('Move successful:', response.data);
         return response.data;
       } catch (error) {
         console.error('Error moving piece:', error.response?.data || error.message);
@@ -110,10 +112,10 @@ export default defineComponent({
           if (response && response.success) {
             board.value = response.board;
             currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
+            await checkKing();
           }
         } catch (error) {
           console.error('Error moving piece:', error);
-          alert('Error moving piece: ' + JSON.stringify(error.response?.data || error.message));
         }
 
         draggedPiece.value = null;
@@ -131,6 +133,15 @@ export default defineComponent({
       return highlightedMoves.value.some(move => move[0] === row && move[1] === col);
     };
 
+    const checkKing = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/isKingInCheck/${currentTurn.value}`);
+        isKingInCheck.value = response.data.isInCheck;
+      } catch (error) {
+        console.error('Error checking king:', error);
+      }
+    };
+
     return {
       board,
       logBoard,
@@ -143,6 +154,7 @@ export default defineComponent({
       getPossibleMoves,
       isHighlighted,
       movePiece,
+      isKingInCheck,
     };
   },
 });

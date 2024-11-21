@@ -6,13 +6,13 @@ import { User } from "../models/user.model";
 export class UserService {
 
     public async getAllUsers(): Promise<UserOutputDTO[]> {
-        let userList = await User.findAll();
+        const userList = await User.findAll();
         return UserMapper.toOutputDtoList(userList);
     }
 
 
     public async getUserById(id: number): Promise<UserOutputDTO> {
-        let user = await User.findByPk(id);
+        const user = await User.findByPk(id);
         if (user) {
             return UserMapper.toOutputDto(user);
         } else {
