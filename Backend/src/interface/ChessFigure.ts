@@ -21,9 +21,7 @@ export abstract class ChessFigure {
     move(toPosition: [number, number], board: (ChessFigure|null)[][]): void {
         if (this.isValidMove(toPosition, board) && this.isKingSafeAfterMove(toPosition, board)) {
             this.position = toPosition;
-            console.log('psartek');
         } else {
-            console.log('nike ta mere');
             throw new Error("Invalid move");
         }
     }
