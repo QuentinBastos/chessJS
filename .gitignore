@@ -9,6 +9,7 @@ lerna-debug.log*
 
 Frontend/node_modules
 Backend/node_modules
+Backend/public/swagger.json
 .DS_Store
 dist
 dist-ssr
