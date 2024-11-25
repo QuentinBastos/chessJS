@@ -44,8 +44,7 @@ export abstract class ChessFigure {
         return kingSafe;
     }
 
-    protected isKingInCheck(color: ChessColor, board: (ChessFigure | null)[][]): boolean {
-        // Find the king's position
+    public isKingInCheck(color: ChessColor, board: (ChessFigure | null)[][]): boolean {
         let kingPosition: [number, number] | null = null;
         for (let i = 0; i < board.length; i++) {
             for (let j = 0; j < board[i].length; j++) {
@@ -62,7 +61,6 @@ export abstract class ChessFigure {
             throw new Error(`King of color ${color} not found on the board`);
         }
 
-        // Check for threats from opponent pieces
         for (let i = 0; i < board.length; i++) {
             for (let j = 0; j < board[i].length; j++) {
                 const piece = board[i][j];

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import ChessService from '../services/chessService';
+import ChessService from '../services/chess.service';
 
 const chessService = new ChessService();
 

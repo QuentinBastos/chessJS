@@ -110,6 +110,12 @@ class ChessService {
             return {success: false, message: 'Internal Server Error'};
         }
     }
+
+    public isKingInCheck(color: string, board: (ChessFigure | null)[][]): boolean {
+        // TODO IMPLEMENT BY USING METHOD isKingInCheck in -> chessFigure
+
+        return false;
+    }
 }
 
 export default ChessService;

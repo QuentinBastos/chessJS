@@ -1,19 +1,16 @@
 import express, { Application } from "express";
 import cors from 'cors';
 import swaggerUi from "swagger-ui-express";
-
-import { RegisterRoutes } from "./routes/index";
+import { API_PORT, FRONT_URL, API_ROOT_URL, API_DOC_URL} from "../../Shared/constants"
+import { RegisterRoutes } from "./routes";
 import errorHandler from "./middlewares/errorHandler";
-import chessRoutes from './routes/chessRoutes';
-import dotenv from 'dotenv';
+import chessRoutes from "./routes/chessRoutes";
 
-dotenv.config();
-
-const PORT = process.env.PORT || 8000;
+const PORT = API_PORT || 8000;
 const app: Application = express();
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL,
+    origin: FRONT_URL,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
 
@@ -22,7 +19,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.static("public"));
 app.use(
-    "/docs",
+    API_DOC_URL,
     swaggerUi.serve,
     swaggerUi.setup(undefined, {
         swaggerOptions: {
@@ -35,7 +32,7 @@ RegisterRoutes(app);
 
 app.use(errorHandler);
 
-app.use('/api', chessRoutes);
+app.use(API_ROOT_URL, chessRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

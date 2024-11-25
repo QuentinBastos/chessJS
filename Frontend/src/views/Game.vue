@@ -30,9 +30,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import {defineComponent, ref} from 'vue';
 import axios from 'axios';
-import { ChessColor, ChessFigure } from '@/../../Backend/src/interface/ChessFigure';
+import {ChessColor, ChessFigure} from '@/../../Backend/src/interface/ChessFigure';
+import {
+  API_URL,
+  API_BOARD_URL,
+  API_POSSIBLES_MOVES_URL,
+  API_MOVE_PIECE_URL,
+  API_KING_CHECK_URL, API_ROOT_URL
+} from '../../../Shared/constants'
 
 export default defineComponent({
   name: 'ChessBoardLogger',
@@ -45,7 +52,7 @@ export default defineComponent({
 
     const logBoard = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/board`);
+        const response = await axios.get(API_URL + API_ROOT_URL + API_BOARD_URL);
         board.value = response.data;
       } catch (error) {
         console.error('Error fetching board:', error);
@@ -54,7 +61,7 @@ export default defineComponent({
 
     const getPossibleMoves = async (pieceId: string) => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/possible-moves/${pieceId}`);
+        const response = await axios.get(`${API_URL}${API_ROOT_URL}${API_POSSIBLES_MOVES_URL.replace(':id', pieceId)}`);
         return response.data;
       } catch (error: unknown) {
         console.error('Error fetching possible moves:', error);
@@ -64,7 +71,7 @@ export default defineComponent({
 
     const movePiece = async (pieceId: number, toPosition: [number, number]) => {
       try {
-        const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/move-piece`, {
+        const response = await axios.post(API_URL + API_ROOT_URL + API_MOVE_PIECE_URL, {
           pieceId,
           toPosition
         });
@@ -83,7 +90,7 @@ export default defineComponent({
     const onDragStart = async (event: DragEvent, row: number, col: number) => {
       const piece = board.value![row][col];
       if (piece && piece.color === currentTurn.value) {
-        draggedPiece.value = { row, col };
+        draggedPiece.value = {row, col};
         highlightedMoves.value = await getPossibleMoves(piece.id.toString());
       } else {
         event.preventDefault();
@@ -135,7 +142,7 @@ export default defineComponent({
 
     const checkKing = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/isKingInCheck/${currentTurn.value}`);
+        const response = await axios.get(`${API_URL}${API_ROOT_URL}${API_KING_CHECK_URL.replace(':color', currentTurn.value)}`);
         isKingInCheck.value = response.data.isInCheck;
       } catch (error) {
         console.error('Error checking king:', error);

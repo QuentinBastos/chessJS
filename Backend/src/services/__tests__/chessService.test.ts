@@ -1,4 +1,4 @@
-import ChessService from '../chessService';
+import ChessService from '../chess.service';
 import {ChessColor} from '../../interface';
 
 describe('ChessService', () => {
