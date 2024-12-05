@@ -46,7 +46,7 @@ const rank = ref(0);
 const register = async () => {
   try {
 
-    await axios.post("http://localhost:8000/users", {
+    await axios.post(`${import.meta.env.VITE_API_URL}/users`, {
       username: username.value,
       email: email.value,
       password: password.value,

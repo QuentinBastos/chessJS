@@ -31,6 +31,14 @@ export class HistoryController extends Controller {
         return historyService.getHistoryById(id);
     }
 
+    @Get("user/{userId}")
+    public async getHistoriesByUserId(
+        @Path() userId: number
+    ): Promise<HistoryOutputDTO[]> {
+        return await historyService.getHistoriesByUser(userId);
+    }
+
+
     @Post("/")
     public async createHistory(
         @Body() requestBody: HistoryInputDTO,

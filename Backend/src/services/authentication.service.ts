@@ -9,7 +9,7 @@ export class AuthenticationService {
     public async authenticate(
         username: string,
         password: string
-    ): Promise<string[]> {
+    ): Promise<(string | number)[]> {
         const user = await User.findOne({ where: { username } });
 
         if (!user) {
@@ -23,7 +23,7 @@ export class AuthenticationService {
         if (password === decodedPassword) {
             console.log("Provided password:", password);
             let jwtToken = this.generateJwt(user.username)
-            return ([jwtToken, user.username, user.email]);
+            return ([jwtToken, user.id, user.username, user.email]);
         } else {
             let error = new Error("Wrong password");
             (error as any).status = 403;
