@@ -2,6 +2,8 @@
   <div>
     <button @click="logBoard">Log Board</button>
     <p>Current Turn: {{ currentTurn }}</p>
+    <button @click="finsih">Finish</button>
+    <p>Current Turn: {{ review }}</p>
     <div>
       <div v-if="isKingInCheck">King is in check!</div>
     </div>
@@ -41,12 +43,14 @@ import {
   API_KING_CHECK_URL,
   API_ROOT_URL,
 } from "../../../Shared/constants";
+import * as punycode from "node:punycode";
 
 const board = ref<(ChessFigure | null)[][] | null>(null);
 const draggedPiece = ref<{ row: number; col: number } | null>(null);
 const currentTurn = ref<ChessColor>(ChessColor.White);
 const highlightedMoves = ref<[number, number][]>([]);
 const isKingInCheck = ref(false);
+const review = ref([])
 
 const logBoard = async () => {
   try {
@@ -116,7 +120,10 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
 
     try {
       const response = await movePiece(pieceId, toPosition);
+      console.log(pieceId, response);
       if (response && response.success) {
+        review.value.push(pieceId +':'+toPosition)
+        console.log(review.value)
         board.value = response.board;
         currentTurn.value =
           currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
@@ -152,8 +159,19 @@ const checkKing = async () => {
   }
 };
 
+async function finsih() {
+  const token = localStorage.getItem("jwt_token");
+  await axios.post(`${API_URL}/games`, {
+    name: 'test',
+    review: JSON.stringify(review.value),
+  }, {
+    headers: {Authorization: `Bearer ${token}`},
+  });
+}
+
 onMounted(logBoard);
 </script>
+
 
 <style scoped>
 .chessboard {

@@ -1,9 +1,9 @@
 <template>
   <div class="flex w-full h-screen overflow-hidden">
     <AsideHome/>
-    <div class="w-[87%] bg-neutral-800 text-white  font-bold py-10 px-32">
+    <div class="w-[87%] bg-neutral-800 text-white font-bold py-10 px-[5%]">
       <div class="flex">
-        <img src="/images/illustration/board-chess.webp" alt="board chess" class="rounded-lg w-[46%] h-fit">
+        <img src="/images/illustration/board-chess.webp" alt="board chess" class="rounded-lg w-[46%] h-fit md:hidden lg:block">
         <div class=" flex flex-col items-center w-full text-center">
           <div class="mt-8 w-full flex flex-col items-center">
             <div class="text-5xl mb-8">
