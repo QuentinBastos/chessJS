@@ -49,6 +49,8 @@ const draggedPiece = ref<{ row: number; col: number } | null>(null);
 const currentTurn = ref<ChessColor>(ChessColor.White);
 const highlightedMoves = ref<[number, number][]>([]);
 const isKingInCheckmate = ref(false);
+const isStaleMate = ref(false);
+const isCheck = ref(false);
 const review = ref(['']);
 
 const loadBoard = async () => {
@@ -63,6 +65,7 @@ const loadBoard = async () => {
 
 const initBoard = async () => {
   try {
+    review.value = [''];
     highlightedMoves.value = [];
     currentTurn.value = ChessColor.White;
     isKingInCheckmate.value = false;
@@ -150,9 +153,15 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
         currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
         const stateResponse = await stateGame();
         if (stateResponse.isInCheck && !stateResponse.movePossible) {
-          console.log("King is in checkmate!");
           isKingInCheckmate.value = true;
           alert("King is in checkmate!");
+        } else if (stateResponse.isInCheck && stateResponse.movePossible) {
+          isCheck.value = true;
+          alert("King is in check!");
+        }
+        else if(!stateResponse.isInCheck && !stateResponse.movePossible) {
+          isStaleMate.value = true;
+          alert("Stalemate!");
         } else {
           isKingInCheckmate.value = false;
         }
