@@ -18,6 +18,12 @@ class ChessService {
     }
 
     initializeStandardChess(): void {
+        for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+                this.board[i][j] = null;
+            }
+        }
+
         let idCounter = 1;
 
         this.placePiece(new Rook(idCounter++, ROOK, [0, 0], ChessColor.White));
@@ -111,10 +117,48 @@ class ChessService {
         }
     }
 
-    public isKingInCheck(color: string, board: (ChessFigure | null)[][]): boolean {
-        // TODO IMPLEMENT BY USING METHOD isKingInCheck in -> chessFigure
+    public stateGame(color: ChessColor, board: (ChessFigure | null)[][]): [boolean, boolean] {
+        let king: King | null = null;
 
-        return false;
+        for (let row = 0; row < board.length; row++) {
+            for (let col = 0; col < board[row].length; col++) {
+                const piece = board[row][col];
+                if (piece && piece.type === KING && piece.color === color) {
+                    king = piece as King;
+                    break;
+                }
+            }
+            if (king) break;
+        }
+
+        if (!king) {
+            throw new Error(`King of color ${color} not found`);
+        }
+
+        const isInCheck = king.isKingInCheck(color, board);
+
+        let movePossible = false;
+        for (let row = 0; row < board.length; row++) {
+            for (let col = 0; col < board[row].length; col++) {
+                const piece = board[row][col];
+                if (piece && piece.color === color) {
+                    for (let toRow = 0; toRow < board.length; toRow++) {
+                        for (let toCol = 0; toCol < board[toRow].length; toCol++) {
+                            const toPosition: [number, number] = [toRow, toCol];
+                            if (piece.isValidMove(toPosition, board) && piece.isKingSafeAfterMove(toPosition, board)) {
+                                movePossible = true;
+                                break;
+                            }
+                        }
+                        if (movePossible) break;
+                    }
+                }
+                if (movePossible) break;
+            }
+            if (movePossible) break;
+        }
+        console.log('isInCheck:', isInCheck, 'movePossible:', movePossible);
+        return [isInCheck, movePossible];
     }
 }
 

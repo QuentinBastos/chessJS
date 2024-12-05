@@ -5,7 +5,7 @@ export class King extends ChessFigure {
         super(id, type, position, color);
     }
 
-    isValidMove(to: [number, number], board: ChessFigure[][]): boolean {
+    isValidMove(to: [number, number], board: (ChessFigure | null)[][]): boolean {
         const [targetFile, targetRank] = to;
         const [currentFile, currentRank] = this.position;
         const fileDiff = Math.abs(targetFile - currentFile);

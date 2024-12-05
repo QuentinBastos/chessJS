@@ -5,7 +5,7 @@ export class Rook extends ChessFigure {
         super(id, type, position, color);
     }
 
-    isValidMove(to: [number, number], board: ChessFigure[][]): boolean {
+    isValidMove(to: [number, number], board: (ChessFigure | null)[][]): boolean {
         const [fromFile, fromRank] = this.position;
         const [toFile, toRank] = to;
 

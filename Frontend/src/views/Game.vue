@@ -1,9 +1,9 @@
 <template>
   <div>
-    <button @click="logBoard">Log Board</button>
+    <button @click="initBoard">Init Board</button>
     <p>Current Turn: {{ currentTurn }}</p>
     <div>
-      <div v-if="isKingInCheck">King is in check!</div>
+      <div v-if="isKingInCheckmate">King is in check!</div>
     </div>
     <div class="chessboard">
       <div v-for="(row, rowIndex) in board" :key="rowIndex" class="row">
@@ -28,11 +28,10 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import {ref, onMounted} from "vue";
 import axios from "axios";
-import { ChessColor, ChessFigure } from "@/../../Backend/src/interface/ChessFigure";
+import {ChessColor, ChessFigure} from "@/../../Backend/src/interface/ChessFigure";
 import {
   API_URL,
   API_BOARD_URL,
@@ -40,18 +39,33 @@ import {
   API_MOVE_PIECE_URL,
   API_KING_CHECK_URL,
   API_ROOT_URL,
+  API_INIT_BOARD_URL,
 } from "../../../Shared/constants";
 
 const board = ref<(ChessFigure | null)[][] | null>(null);
 const draggedPiece = ref<{ row: number; col: number } | null>(null);
 const currentTurn = ref<ChessColor>(ChessColor.White);
 const highlightedMoves = ref<[number, number][]>([]);
-const isKingInCheck = ref(false);
+const isKingInCheckmate = ref(false);
 
-const logBoard = async () => {
+const loadBoard = async () => {
   try {
     const response = await axios.get(API_URL + API_ROOT_URL + API_BOARD_URL);
     board.value = response.data;
+    console.log("Board:", board.value);
+  } catch (error) {
+    console.error("Error fetching board:", error);
+  }
+};
+
+const initBoard = async () => {
+  try {
+    highlightedMoves.value = [];
+    currentTurn.value = ChessColor.White;
+    isKingInCheckmate.value = false;
+    const response = await axios.get(API_URL + API_ROOT_URL + API_INIT_BOARD_URL);
+    board.value = response.data;
+    console.log("Board:", board.value);
   } catch (error) {
     console.error("Error fetching board:", error);
   }
@@ -82,6 +96,17 @@ const movePiece = async (pieceId: number, toPosition: [number, number]) => {
   }
 };
 
+const stateGame = async () => {
+  try {
+    const response = await axios.get(
+      `${API_URL}${API_ROOT_URL}${API_KING_CHECK_URL.replace(":color", currentTurn.value)}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error checking king:", error);
+  }
+};
+
 const getImageSrc = (type: number, color: string): string => {
   const pieceColor = color.toLowerCase();
   return `/images/pieces/${pieceColor}_${type}.png`;
@@ -90,7 +115,7 @@ const getImageSrc = (type: number, color: string): string => {
 const onDragStart = async (event: DragEvent, row: number, col: number) => {
   const piece = board.value![row][col];
   if (piece && piece.color === currentTurn.value) {
-    draggedPiece.value = { row, col };
+    draggedPiece.value = {row, col};
     highlightedMoves.value = await getPossibleMoves(piece.id.toString());
   } else {
     event.preventDefault();
@@ -118,14 +143,19 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
       const response = await movePiece(pieceId, toPosition);
       if (response && response.success) {
         board.value = response.board;
-        currentTurn.value =
-          currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
-        await checkKing();
+        currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
+        const stateResponse = await stateGame();
+        if (stateResponse.isInCheck && !stateResponse.movePossible) {
+          console.log("King is in checkmate!");
+          isKingInCheckmate.value = true;
+          alert("King is in checkmate!");
+        } else {
+          isKingInCheckmate.value = false;
+        }
       }
     } catch (error) {
       console.error("Error moving piece:", error);
     }
-
     draggedPiece.value = null;
     highlightedMoves.value = [];
   }
@@ -141,18 +171,7 @@ const isHighlighted = (row: number, col: number): boolean => {
   return highlightedMoves.value.some((move) => move[0] === row && move[1] === col);
 };
 
-const checkKing = async () => {
-  try {
-    const response = await axios.get(
-      `${API_URL}${API_ROOT_URL}${API_KING_CHECK_URL.replace(":color", currentTurn.value)}`
-    );
-    isKingInCheck.value = response.data.isInCheck;
-  } catch (error) {
-    console.error("Error checking king:", error);
-  }
-};
-
-onMounted(logBoard);
+onMounted(loadBoard);
 </script>
 
 <style scoped>
