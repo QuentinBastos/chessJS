@@ -1,31 +1,39 @@
 <template>
-  <div>
-    <button @click="initBoard">Init Board</button>
-    <p>Current Turn: {{ currentTurn }}</p>
-    <button @click="finish">Finish</button>
-    <p>Current Turn: {{ review }}</p>
-    <div>
-      <div v-if="isKingInCheckmate">King is in check!</div>
-    </div>
-    <div class="chessboard">
-      <div v-for="(row, rowIndex) in board" :key="rowIndex" class="row">
-        <div
-          v-for="(cell, cellIndex) in row"
-          :key="cellIndex"
-          :class="['cell', { 'highlight': isHighlighted(rowIndex, cellIndex) }]"
-          @drop="onDrop($event, rowIndex, cellIndex)"
-          @dragover="onDragOver($event)"
-        >
-          <img
-            class="piece"
-            v-if="cell"
-            :src="getImageSrc(cell.type, cell.color)"
-            :alt="`Piece ${cell.id}`"
-            :draggable="cell.color === currentTurn"
-            @dragstart="onDragStart($event, rowIndex, cellIndex)"
-            @click="onPieceClick(cell)"
-          />
+  <div class="flex w-full h-screen overflow-hidden">
+    <AsideHome/>
+    <div class="w-full bg-neutral-800 flex items-center justify-center h-screen">
+      <div class="flex w-1/2 h-fit">
+        <div class="chessboard w-full">
+          <div v-for="(row, rowIndex) in board" :key="rowIndex" class="row">
+            <div
+              v-for="(cell, cellIndex) in row"
+              :key="cellIndex"
+              :class="[ 'cell',
+            (rowIndex + cellIndex) % 2 === 0 ? 'bg-sky-900' : 'bg-blue-50'
+          ]"
+              @drop="onDrop($event, rowIndex, cellIndex)"
+              @dragover="onDragOver($event)"
+            >
+              <div class="highlight-overlay" v-if="isHighlighted(rowIndex, cellIndex)"></div>
+              <img
+                class="piece"
+                v-if="cell"
+                :src="getImageSrc(cell.type, cell.color)"
+                :alt="`Piece ${cell.id}`"
+                :draggable="cell.color === currentTurn"
+                @dragstart="onDragStart($event, rowIndex, cellIndex)"
+                @click="onPieceClick(cell)"
+              />
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="flex flex-col w-1/3">
+        <button @click="initBoard">Init Board</button>
+        <p>Current Turn: {{ currentTurn }}</p>
+        <button @click="finish">Finish</button>
+        <p>Current Turn: {{ review }}</p>
+        <div v-if="isKingInCheckmate">King is in check!</div>
       </div>
     </div>
   </div>
@@ -43,6 +51,7 @@ import {
   API_ROOT_URL,
   API_INIT_BOARD_URL,
 } from "../../../Shared/constants";
+import AsideHome from "@/components/home/aside.vue";
 
 const board = ref<(ChessFigure | null)[][] | null>(null);
 const draggedPiece = ref<{ row: number; col: number } | null>(null);
@@ -193,9 +202,11 @@ onMounted(loadBoard);
 .chessboard {
   display: grid;
   justify-content: center;
-  grid-template-columns: repeat(8, 50px);
-  grid-template-rows: repeat(8, 50px);
+  grid-template-columns: repeat(8, 12.5%);
+  grid-template-rows: repeat(8, 12.5%);
   transform: rotate(-90deg);
+  border: 0.5em solid black;
+  border-radius: 1%;
 }
 
 .row {
@@ -203,26 +214,36 @@ onMounted(loadBoard);
 }
 
 .cell {
+  position: relative;
   transform: rotate(90deg);
-  background: white;
-  width: 50px;
-  height: 50px;
-  border: 1px solid black;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+
+  &:hover {
+    opacity: 0.75;
+  }
 }
 
-.cell span {
-  color: black;
-}
 
 .piece {
-  height: 40px;
-  width: 40px;
+  padding: 12.5%;
+  height: 100%;
+  width: 100%;
 }
 
-.highlight {
-  background-color: yellow;
+.highlight-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #fff374;
+  border-radius: 50%;
+  pointer-events: none;
+  scale: 0.5;
+  filter: blur(6px);
 }
 </style>
