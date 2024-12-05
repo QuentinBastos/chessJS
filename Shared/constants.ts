@@ -6,4 +6,4 @@ export const API_DOC_URL = "/docs";
 export const API_BOARD_URL = "/board";
 export const API_POSSIBLES_MOVES_URL = "/possible-moves/:id";
 export const API_MOVE_PIECE_URL = "/move-piece";
-export const API_KING_CHECK_URL = "/isKingInCheck/:color"
+export const API_KING_CHECK_URL = "/isKingInCheck/:color";

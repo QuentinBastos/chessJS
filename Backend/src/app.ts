@@ -1,7 +1,7 @@
 import express, { Application } from "express";
 import cors from 'cors';
 import swaggerUi from "swagger-ui-express";
-import { API_PORT, FRONT_URL, API_ROOT_URL, API_DOC_URL} from "../../Shared/constants"
+import { API_PORT, FRONT_URL, API_ROOT_URL, API_DOC_URL } from "../../Shared/constants";
 import { RegisterRoutes } from "./routes";
 import errorHandler from "./middlewares/errorHandler";
 import chessRoutes from "./routes/chessRoutes";
@@ -13,7 +13,6 @@ app.use(cors({
     origin: FRONT_URL,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
-
 }));
 
 app.use(express.json());
