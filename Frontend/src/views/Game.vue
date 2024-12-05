@@ -2,6 +2,8 @@
   <div>
     <button @click="initBoard">Init Board</button>
     <p>Current Turn: {{ currentTurn }}</p>
+    <button @click="finish">Finish</button>
+    <p>Current Turn: {{ review }}</p>
     <div>
       <div v-if="isKingInCheckmate">King is in check!</div>
     </div>
@@ -47,6 +49,7 @@ const draggedPiece = ref<{ row: number; col: number } | null>(null);
 const currentTurn = ref<ChessColor>(ChessColor.White);
 const highlightedMoves = ref<[number, number][]>([]);
 const isKingInCheckmate = ref(false);
+const review = ref([])
 
 const loadBoard = async () => {
   try {
@@ -142,6 +145,7 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
     try {
       const response = await movePiece(pieceId, toPosition);
       if (response && response.success) {
+        review.value.push(pieceId +':'+toPosition)
         board.value = response.board;
         currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
         const stateResponse = await stateGame();
@@ -171,8 +175,19 @@ const isHighlighted = (row: number, col: number): boolean => {
   return highlightedMoves.value.some((move) => move[0] === row && move[1] === col);
 };
 
+async function finish() {
+  const token = localStorage.getItem("jwt_token");
+  await axios.post(`${API_URL}/games`, {
+    name: 'test',
+    review: JSON.stringify(review.value),
+  }, {
+    headers: {Authorization: `Bearer ${token}`},
+  });
+}
+
 onMounted(loadBoard);
 </script>
+
 
 <style scoped>
 .chessboard {

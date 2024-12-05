@@ -37,6 +37,7 @@ import {ref} from "vue";
 import navButton from "@/components/tools/button.vue";
 
 import router from "@/router";
+import {API_URL} from "../../../Shared/constants";
 
 const username = ref("");
 const password = ref("");
@@ -46,7 +47,7 @@ const rank = ref(0);
 const register = async () => {
   try {
 
-    await axios.post(`${import.meta.env.VITE_API_URL}/users`, {
+    await axios.post(`${API_URL}/users`, {
       username: username.value,
       email: email.value,
       password: password.value,

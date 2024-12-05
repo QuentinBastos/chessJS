@@ -29,6 +29,7 @@ import { ref } from "vue";
 import navButton from "@/components/tools/button.vue";
 
 import router from "@/router";
+import { API_URL } from "../../../Shared/constants";
 
 const username = ref("");
 const password = ref("");
@@ -36,7 +37,7 @@ const password = ref("");
 const login = async () => {
   try {
 
-    const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth`, {
+    const response = await axios.post(`${API_URL}/auth`, {
       grant_type: "password",
       username: username.value,
       password: password.value,
