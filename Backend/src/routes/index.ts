@@ -88,7 +88,6 @@ const models: TsoaRoute.Models = {
         "properties": {
             "id": {"dataType":"double","required":true},
             "name": {"dataType":"string","required":true},
-            "status": {"dataType":"double","required":true},
             "review": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
@@ -98,7 +97,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "name": {"dataType":"string","required":true},
-            "status": {"dataType":"double","required":true},
             "review": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
@@ -108,7 +106,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "name": {"dataType":"string"},
-            "status": {"dataType":"double"},
             "review": {"dataType":"string"},
         },
         "additionalProperties": false,
@@ -345,6 +342,37 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getHistoryById',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/histories/user/:userId',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(HistoryController)),
+            ...(fetchMiddlewares<RequestHandler>(HistoryController.prototype.getHistoriesByUserId)),
+
+            async function HistoryController_getHistoriesByUserId(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    userId: {"in":"path","name":"userId","required":true,"dataType":"double"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new HistoryController();
+
+              await templateService.apiHandler({
+                methodName: 'getHistoriesByUserId',
                 controller,
                 response,
                 next,

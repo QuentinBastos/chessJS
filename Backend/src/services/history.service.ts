@@ -27,6 +27,17 @@ export class HistoryService {
         }
     }
 
+    public async getHistoriesByUser(userId: number): Promise<HistoryOutputDTO[]> {
+        const histories = await History.findAll({
+            where: { idUser: userId },
+            include: [Game],
+        });
+        if (histories.length === 0) {
+            throw new Error(`No histories found for user with id ${userId}`);
+        }
+        return HistoryMapper.toOutputDtoList(histories);
+    }
+
     public async createHistory(input: HistoryInputDTO): Promise<HistoryOutputDTO> {
         const { idUser, idGame } = input;
 

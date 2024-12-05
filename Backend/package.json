@@ -6,7 +6,7 @@
     "start": "tsc && node dist/app.js",
     "lint": "eslint .. --ext .ts",
     "test": "jest",
-    "generate": "npx tsoa routes && npx tsoa spec",
+    "swagger": "tsoa spec && tsoa routes",
     "predev": "npm run swagger",
     "stop": "pkill --signal SIGINT myApp"
   },

@@ -4,7 +4,6 @@ import sequelize from "../config/database"; // Connexion à la base de données
 export interface GameAttributes {
     id?: number;
     name: string;
-    status: number;
     review: string;
 }
 
@@ -14,7 +13,6 @@ export class Game
 {
     public id!: number;
     public name!: string;
-    public status!: number;
     public review!: string;
 }
 
@@ -27,10 +25,6 @@ Game.init(
         },
         name: {
             type: DataTypes.STRING,
-            allowNull: false,
-        },
-        status: {
-            type: DataTypes.INTEGER,
             allowNull: false,
         },
         review: {

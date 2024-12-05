@@ -6,7 +6,6 @@ export class GameMapper {
         return {
             id: game.id,
             name: game.name,
-            status: game.status,
             review: game.review,
         };
     }
