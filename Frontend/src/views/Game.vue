@@ -49,7 +49,7 @@ const draggedPiece = ref<{ row: number; col: number } | null>(null);
 const currentTurn = ref<ChessColor>(ChessColor.White);
 const highlightedMoves = ref<[number, number][]>([]);
 const isKingInCheckmate = ref(false);
-const review = ref([])
+const review = ref(['']);
 
 const loadBoard = async () => {
   try {
@@ -145,7 +145,7 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
     try {
       const response = await movePiece(pieceId, toPosition);
       if (response && response.success) {
-        review.value.push(pieceId +':'+toPosition)
+        review.value.push(pieceId + ':' + toPosition)
         board.value = response.board;
         currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
         const stateResponse = await stateGame();
