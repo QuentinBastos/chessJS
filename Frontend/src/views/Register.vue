@@ -15,12 +15,12 @@
                class="w-full rounded border-2 border-neutral-400 bg-neutral-500 text-white py-1 pl-2"/>
         <input v-model="password" type="password" placeholder="Password"
                class="w-full rounded border-2 border-neutral-400 bg-neutral-500 text-white py-1 pl-2"/>
-<!--        <div>-->
-<!--           <div class="flex flex-col">-->
-<!--             <img src="">-->
-<!--             <p></p>-->
-<!--           </div>-->
-<!--        </div>-->
+        <!--        <div>-->
+        <!--           <div class="flex flex-col">-->
+        <!--             <img src="">-->
+        <!--             <p></p>-->
+        <!--           </div>-->
+        <!--        </div>-->
         <nav-button name="Log Up" link="" @click="register" class="w-full"/>
       </div>
       <div>
@@ -37,7 +37,7 @@ import {ref} from "vue";
 import navButton from "@/components/tools/button.vue";
 
 import router from "@/router";
-import {API_URL} from "../../../Shared/constants";
+import {API_URL} from "../../constants";
 
 const username = ref("");
 const password = ref("");

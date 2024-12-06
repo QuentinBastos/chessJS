@@ -5,7 +5,7 @@ import {
     API_KING_CHECK_URL,
     API_MOVE_PIECE_URL,
     API_POSSIBLES_MOVES_URL
-} from '../../../Shared/constants'
+} from '../constants'
 
 import {getBoard, getPossibleMoves, initBoard, stateGame, movePiece} from '../controllers/chess.controller';
 

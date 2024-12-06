@@ -110,6 +110,11 @@ class ChessService {
             piece.move(to, this.board);
             this.board[toFile][toRank] = piece;
             this.board[fromFile][fromRank] = null;
+
+            if (piece.type === PAWN && (toRank === 0 || toRank === 7)) {
+                // TODO - Implement promotion
+                this.board[toFile][toRank] = new Queen(piece.id, QUEEN, [toFile, toRank], piece.color);
+            }
             return {success: true, board: this.board};
         } catch (error) {
             console.error('Error moving piece:', error);

@@ -5,8 +5,7 @@
     "src/**/*",
     "src/**/*.vue",
     "../Backend/src/**/*",
-    "../../Shared/**/*.ts",
-    "../../Shared/constants.ts"
+    "constants.ts"
   ],
   "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {

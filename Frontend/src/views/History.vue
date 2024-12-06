@@ -4,7 +4,7 @@
     <div class="w-[87%] bg-neutral-800 text-white  font-bold py-10 px-16">
       <div class="flex gap-2 items-center mb-6">
         <img src="/images/icons/binoculars.png" class="w-[54px]">
-        <h1 class="text-3xl">Historiques ({{gameList.length}})</h1>
+        <h1 class="text-3xl">Historiques ({{ gameList.length }})</h1>
       </div>
       <div class="flex-col bg-neutral-900 py-4 px-2 rounded">
         <table class="w-full table-auto">
@@ -25,7 +25,10 @@
             <td class="text-center">Local</td>
             <td class="text-center">Gagné</td>
             <td class="text-center"> {{ JSON.parse(game.review).length }}</td>
-            <td class="text-center"><router-link :to="'/review/'+ game.id" class="bg-sky-600 py-1 px-1 font-medium rounded">Revoir</router-link></td>
+            <td class="text-center">
+              <router-link :to="'/review/'+ game.id" class="bg-sky-600 py-1 px-1 font-medium rounded">Revoir
+              </router-link>
+            </td>
           </tr>
           </tbody>
         </table>
@@ -39,7 +42,7 @@
 import AsideHome from "@/components/home/aside.vue";
 import {ref, onMounted} from "vue";
 import axios from "axios";
-import {API_URL} from "../../../Shared/constants";
+import {API_URL} from "../../constants";
 
 const histories = ref([]);
 const gameList = ref([]);

@@ -3,7 +3,8 @@
     <AsideHome/>
     <div class="w-[87%] bg-neutral-800 text-white font-bold py-10 px-[5%]">
       <div class="flex">
-        <img src="/images/illustration/board-chess.webp" alt="board chess" class="rounded-lg w-[46%] h-fit md:hidden lg:block">
+        <img src="/images/illustration/board-chess.webp" alt="board chess"
+             class="rounded-lg w-[46%] h-fit md:hidden lg:block">
         <div class=" flex flex-col items-center w-full text-center">
           <div class="mt-8 w-full flex flex-col items-center">
             <div class="text-5xl mb-8">
@@ -22,7 +23,8 @@
               </div>
             </div>
             <div class="w-[65%] flex flex-col gap-8">
-              <button-icon name="Jouez en ligne" desc="Jouez avec quelqu'un de votre niveau" type="primary" link="/game"/>
+              <button-icon name="Jouez en ligne" desc="Jouez avec quelqu'un de votre niveau" type="primary"
+                           link="/game"/>
               <button-icon name="Jouez contre l'ordinateur"
                            desc="Jouez contre des robots d'entrainement personnalisables" link="/game"/>
             </div>

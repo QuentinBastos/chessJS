@@ -25,11 +25,11 @@
 
 <script setup lang="ts">
 import axios from "axios";
-import { ref } from "vue";
+import {ref} from "vue";
 import navButton from "@/components/tools/button.vue";
 
 import router from "@/router";
-import { API_URL } from "../../../Shared/constants";
+import {API_URL} from "../../constants";
 
 const username = ref("");
 const password = ref("");
@@ -51,7 +51,7 @@ const login = async () => {
     const {token} = response.data;
     console.log(token)
     localStorage.setItem("jwt_token", token[0]);
-    let user = {id: token[1], username: token[2],email : token[3]};
+    let user = {id: token[1], username: token[2], email: token[3]};
     localStorage.setItem("user", JSON.stringify(user));
     await router.push({path: '/'})
 
