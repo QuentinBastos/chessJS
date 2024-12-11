@@ -42,7 +42,7 @@
 import AsideHome from "@/components/home/aside.vue";
 import {ref, onMounted} from "vue";
 import axios from "axios";
-import {API_URL} from "../../constants";
+import {API_URL} from "../constants";
 
 const histories = ref([]);
 const gameList = ref([]);

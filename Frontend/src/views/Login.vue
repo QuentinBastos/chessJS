@@ -29,7 +29,7 @@ import {ref} from "vue";
 import navButton from "@/components/tools/button.vue";
 
 import router from "@/router";
-import {API_URL} from "../../constants";
+import {API_URL} from "../constants";
 
 const username = ref("");
 const password = ref("");
