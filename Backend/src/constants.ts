@@ -4,7 +4,6 @@ export const BISHOP = 3;
 export const QUEEN = 4;
 export const KING = 5;
 export const PAWN = 6;
-export const API_URL = "http://localhost:8000";
 export const API_PORT = "8000";
 export const FRONT_URL = "http://localhost:5173";
 export const API_ROOT_URL = "/api";

@@ -50,7 +50,7 @@ const gameList = ref([]);
 onMounted(async () => {
   try {
     const token = localStorage.getItem("jwt_token");
-    const userId = JSON.parse(localStorage.getItem("user")).id;
+    const userId = JSON.parse(<string>localStorage.getItem("user")).id;
 
     const response = await axios.get(
       `${API_URL}/histories/user/${userId}`,

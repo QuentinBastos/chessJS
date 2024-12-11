@@ -1,34 +1,58 @@
 <template>
   <div class="flex w-full h-screen overflow-hidden">
     <AsideHome/>
-    <div class="w-full bg-neutral-800 flex items-center justify-center h-screen">
-      <div class="flex w-1/2 h-fit">
-        <div class="chessboard w-full">
-          <div v-for="(row, rowIndex) in board" :key="rowIndex" class="row">
-            <div
-              v-for="(cell, cellIndex) in row"
-              :key="cellIndex"
-              :class="[ 'cell',
-            (rowIndex + cellIndex) % 2 === 0 ? 'bg-sky-900' : 'bg-blue-50'
-          ]"
-              @drop="onDrop($event, rowIndex, cellIndex)"
-              @dragover="onDragOver($event)"
-            >
-              <div class="highlight-overlay" v-if="isHighlighted(rowIndex, cellIndex)"></div>
-              <img
-                class="piece"
-                v-if="cell"
-                :src="getImageSrc(cell.type, cell.color)"
-                :alt="`Piece ${cell.id}`"
-                :draggable="cell.color === currentTurn"
-                @dragstart="onDragStart($event, rowIndex, cellIndex)"
-                @click="onPieceClick(cell)"
-              />
+    <div class="w-[92%] bg-neutral-800 flex items-center justify-around h-full sm:gap-2 gap-8 px-8">
+      <div class="flex flex-col w-full h-full justify-between">
+        <div class="flex text-white font-bold flex gap-4 my-2 h-[10vh]">
+          <img src="/images/player/car.png" width="48" height="48" alt="iconProfile"/>
+          <div>
+            <span>Modzi</span>
+            <span>(450)</span>
+          </div>
+          <ul class="flex-inline">
+            <li>
+              <img src="">
+            </li>
+          </ul>
+        </div>
+        <div class="flex justify-center h-[80vh]">
+          <div class="chessboard h-full">
+            <div v-for="(row, rowIndex) in board" :key="rowIndex" class="row">
+              <div
+                v-for="(cell, cellIndex) in row"
+                :key="cellIndex"
+                :class="[ 'cell', (rowIndex + cellIndex) % 2 === 0 ? 'bg-[#54769a] ' : 'bg-blue-50']"
+                @drop="onDrop($event, rowIndex, cellIndex)"
+                @dragover="onDragOver($event)"
+              >
+                <div class="highlight-overlay" v-if="isHighlighted(rowIndex, cellIndex)"></div>
+                <img
+                  class="piece"
+                  v-if="cell"
+                  :src="getImageSrc(cell.type, cell.color)"
+                  :alt="`Piece ${cell.id}`"
+                  :draggable="cell.color === currentTurn"
+                  @dragstart="onDragStart($event, rowIndex, cellIndex)"
+                  @click="onPieceClick(cell)"
+                />
+              </div>
             </div>
           </div>
         </div>
+        <div class="text-white font-bold flex gap-4 my-2 h-[10vh]">
+          <img src="/images/player/car.png" width="48" height="48" alt="iconProfile"/>
+          <div>
+            <span>Modzi</span>
+            <span>(450)</span>
+          </div>
+          <ul class="flex-inline">
+            <li>
+              <img src="">
+            </li>
+          </ul>
+        </div>
       </div>
-      <div v-if="errorMessage.length" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+      <div v-if="errorMessage.length" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 right-4 top-4 rounded absolute"
            role="alert">
         <strong class="font-bold">{{ errorMessage[0].title }}</strong>
         <br>
@@ -39,11 +63,21 @@
             d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
         </span>
       </div>
-      <div class="flex flex-col w-1/3">
-        <button @click="initBoard">Init Board</button>
+      <div class="flex flex-col items-center w-2/3 gap-4">
+        <div @click="initBoard" class=" flex border w-full mt-4 rounded justify-center
+          py-2 bg-white text-black font-bold hover:opacity-75">
+          <p>Commencer</p>
+        </div>
         <p>Current Turn: {{ currentTurn }}</p>
-        <button @click="finish">Finish</button>
-        <p>Current Turn: {{ review }}</p>
+        <div @click="finish" class=" flex border w-full mt-4 rounded justify-center
+          py-2 bg-neutral-800 text-white font-bold hover:opacity-75">
+          <p>Abandonner</p>
+        </div>
+        <ul class="flex flex-col gap-2">
+          <li v-for="(pair, index) in groupedReviews" :key="index">
+            {{ index + 1 }}. {{ pair[0] }} - {{ pair[1] }}
+          </li>
+        </ul>
         <div v-if="isKingInCheckmate">King is in check!</div>
       </div>
     </div>
@@ -67,7 +101,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import {ref, onMounted} from "vue";
+import {ref, onMounted, computed} from "vue";
 import axios from "axios";
 import {ChessColor, ChessFigure} from "@/../../Backend/src/interface/ChessFigure";
 import {
@@ -89,6 +123,7 @@ const draggedPiece = ref<{ row: number; col: number } | null>(null);
 const currentTurn = ref<ChessColor>(ChessColor.White);
 const highlightedMoves = ref<[number, number][]>([]);
 const isKingInCheckmate = ref(false);
+const reviewList = ref(['']);
 const isStaleMate = ref(false);
 const isCheck = ref(false);
 const review = ref(['']);
@@ -108,6 +143,14 @@ const loadBoard = async () => {
     console.error("Error fetching board:", error);
   }
 };
+
+const groupedReviews = computed(() => {
+  const pairs = [];
+  for (let i = 0; i < reviewList.length; i += 2) {
+    pairs.push([reviewList[i], reviewList[i + 1] || ""]);
+  }
+  return pairs;
+});
 
 const initBoard = async () => {
   try {
@@ -194,7 +237,7 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
     try {
       const response = await movePiece(pieceId, toPosition);
       if (response && response.success) {
-        review.value.push(pieceId + ':' + toPosition)
+        reviewList.value.push(pieceId + ':' + toPosition)
         board.value = response.board;
         currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
 
@@ -207,6 +250,7 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
 
         const stateResponse = await stateGame();
         if (stateResponse.isInCheck && !stateResponse.movePossible) {
+          console.log("King is in checkmate!");
           isKingInCheckmate.value = true;
         } else if (stateResponse.isInCheck && stateResponse.movePossible) {
           isCheck.value = true;
@@ -285,10 +329,12 @@ onMounted(loadBoard);
 .chessboard {
   display: grid;
   justify-content: center;
-  grid-template-columns: repeat(8, 12.5%);
-  grid-template-rows: repeat(8, 12.5%);
+  grid-template-rows: repeat(8, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   transform: rotate(-90deg);
-  border: 0.5em solid black;
+  outline: 0.25em solid white;;
+  border: 0.15em solid black;
+  aspect-ratio: 1;
   border-radius: 1%;
 }
 

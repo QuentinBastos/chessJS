@@ -27,10 +27,10 @@
 import axios from "axios";
 import {ref} from "vue";
 import navButton from "@/components/tools/button.vue";
+import { useRouter } from 'vue-router'
+import { API_URL } from "../../constants";
 
-import router from "@/router";
-import {API_URL} from "../../constants";
-
+const router = useRouter()
 const username = ref("");
 const password = ref("");
 
