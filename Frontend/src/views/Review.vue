@@ -28,7 +28,7 @@
 <script setup lang="ts">
 import axios from "axios";
 import {ChessColor, ChessFigure} from "@/../../Backend/src/interface/ChessFigure";
-import {API_BOARD_URL, API_ROOT_URL, API_URL} from "../constants";
+import {API_BOARD_URL, API_ROOT_URL, API_URL} from "@/constants";
 import {onMounted, ref} from "vue";
 import {useRoute} from "vue-router"
 

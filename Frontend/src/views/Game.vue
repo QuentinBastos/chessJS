@@ -84,7 +84,7 @@ import {
   API_INIT_BOARD_URL,
   API_GAMES_URL,
   PAWN,
-} from "../constants";
+} from "@/constants";
 
 import AsideHome from "@/components/home/aside.vue";
 
