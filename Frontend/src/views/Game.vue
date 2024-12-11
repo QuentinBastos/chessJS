@@ -215,9 +215,14 @@ const getImageSrc = (type: number, color: string): string => {
 };
 
 const onDragStart = async (event: DragEvent, row: number, col: number) => {
+  if (!isGameStarted.value) {
+    event.preventDefault();
+    return;
+  }
+
   const piece = board.value![row][col];
   if (piece && piece.color === currentTurn.value) {
-    draggedPiece.value = {row, col};
+    draggedPiece.value = { row, col };
     highlightedMoves.value = await getPossibleMoves(piece.id.toString());
   } else {
     event.preventDefault();
@@ -273,7 +278,7 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
 };
 
 const onPieceClick = async (piece: ChessFigure) => {
-  if (piece.color === currentTurn.value) {
+  if (piece.color === currentTurn.value && isGameStarted.value) {
     highlightedMoves.value = await getPossibleMoves(piece.id.toString());
   }
 };
@@ -363,6 +368,9 @@ onUnmounted(giveUp);
   border: 0.15em solid black;
   aspect-ratio: 1;
   border-radius: 1%;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .row {
