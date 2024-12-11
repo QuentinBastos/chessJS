@@ -6,6 +6,7 @@ class ChessService {
     private capturedPieces: ChessFigure[];
     private review: string[] = [];
     private currentTurn: ChessColor;
+    private isGameStarted: boolean;
 
     constructor() {
         this.board = this.createEmptyBoard();
@@ -13,6 +14,7 @@ class ChessService {
         this.capturedPieces = [];
         this.review = [];
         this.currentTurn = ChessColor.White;
+        this.isGameStarted = false;
     }
 
     private createEmptyBoard(): (ChessFigure | null)[][] {
@@ -92,6 +94,14 @@ class ChessService {
         this.currentTurn = currentTurn;
     }
 
+    public getIsGameStarted(): boolean {
+        return this.isGameStarted;
+    }
+
+    public setIsGameStarted(isGameStarted: boolean): void {
+        this.isGameStarted = isGameStarted;
+    }
+
     public getPieceById(id: number): ChessFigure | null {
         for (let row = 0; row < this.board.length; row++) {
             for (let col = 0; col < this.board[row].length; col++) {
@@ -106,7 +116,6 @@ class ChessService {
 
     public checkMove(piece: ChessFigure): [number, number][] {
         const availablePositions: [number, number][] = [];
-        // TODO : store current turn in the state
         for (let row = 0; row < this.board.length; row++) {
             for (let col = 0; col < this.board[row].length; col++) {
                 const toPosition: [number, number] = [row, col];

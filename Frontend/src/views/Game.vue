@@ -67,21 +67,15 @@
         </span>
       </div>
       <div class="flex flex-col items-center w-2/3 gap-4">
-        <div @click="initBoard" class=" flex border w-full mt-4 rounded justify-center
+        <div v-if="!isGameStarted" @click="initBoard" class=" flex border w-full mt-4 rounded justify-center
           py-2 bg-white text-black font-bold hover:opacity-75">
           <p>Commencer</p>
         </div>
         <p>Current Turn: {{ currentTurn }}</p>
-        <div @click="giveUp" class=" flex border w-full mt-4 rounded justify-center
+        <div v-if="isGameStarted" @click="giveUp" class=" flex border w-full mt-4 rounded justify-center
           py-2 bg-neutral-800 text-white font-bold hover:opacity-75">
           <p>Abandonner</p>
         </div>
-        <ul class="flex flex-col gap-2">
-          <li v-for="(pair, index) in groupedReviews" :key="index">
-            {{ index + 1 }}. {{ pair[0] }} - {{ pair[1] }}
-          </li>
-        </ul>
-        <div v-if="isKingInCheckmate">King is in check!</div>
       </div>
     </div>
     <div v-if="isCheck || isKingInCheckmate || isStaleMate || hasGivenUp" id="popup-modal" tabindex="-1"
@@ -116,7 +110,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import {ref, onMounted, computed} from "vue";
+import {ref, onMounted, computed, onUnmounted} from "vue";
 import {useRouter} from "vue-router";
 import axios from "axios";
 import {ChessColor, ChessFigure} from "@/../../Backend/src/interface/ChessFigure";
@@ -128,7 +122,7 @@ import {
   API_KING_CHECK_URL,
   API_ROOT_URL,
   API_INIT_BOARD_URL,
-  API_GAMES_URL,
+  API_GAMES_URL, API_END_GAME_URL,
 } from "@/constants";
 
 import AsideHome from "@/components/home/aside.vue";
@@ -137,6 +131,7 @@ const router = useRouter();
 const board = ref<(ChessFigure | null)[][] | null>(null);
 const draggedPiece = ref<{ row: number; col: number } | null>(null);
 const currentTurn = ref<ChessColor>(ChessColor.White);
+const isGameStarted = ref(false);
 const highlightedMoves = ref<[number, number][]>([]);
 const isKingInCheckmate = ref(false);
 const isStaleMate = ref(false);
@@ -155,6 +150,7 @@ const loadBoard = async () => {
     review.value = response.data.review;
     board.value = response.data.board;
     currentTurn.value = response.data.currentTurn;
+    isGameStarted.value = response.data.isGameStarted;
   } catch (error) {
     errorMessage.value.push({title: "Error fetching board", message: error});
   }
@@ -170,7 +166,8 @@ const initBoard = async () => {
     isCheck.value = false;
     capturedPieces.value = [];
     const response = await axios.get(API_URL + API_ROOT_URL + API_INIT_BOARD_URL);
-    board.value = response.data;
+    board.value = response.data.board;
+    isGameStarted.value = response.data.isGameStarted;
   } catch (error) {
     errorMessage.value.push({title: "Error fetching board", message: error});
   }
@@ -315,19 +312,22 @@ async function giveUp() {
     hasGivenUp.value = true;
     showModal("Vous avez abandonné! <br> Game Over! <br> Winner: " + (currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White));
     await finish();
-  } catch (error) {
-    errorMessage.value.push({title: "Error giving up", message: error.message || error});
+  } catch (error: any) {
+    errorMessage.value.push({title: "Error giving up", message: error.message });
   }
 }
 
 async function finish() {
   try {
     const token = localStorage.getItem("jwt_token");
+    const response = await axios.post(`${API_URL}${API_ROOT_URL}${API_END_GAME_URL}`);
+    isGameStarted.value = response.data.isGameStarted;
+
     await axios.post(`${API_URL}${API_GAMES_URL}`, {
       name: 'test',
       review: JSON.stringify(review.value),
     }, {
-      headers: {Authorization: `Bearer ${token}`},
+      headers: { Authorization: `Bearer ${token}` },
     });
   } catch (error) {
     errorMessage.value.push({title: "Error finishing game", message: error.message || error});
@@ -348,6 +348,7 @@ const capturedBlackPieces = computed(() => {
 });
 
 onMounted(loadBoard);
+onUnmounted(giveUp);
 </script>
 
 
