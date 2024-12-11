@@ -138,11 +138,7 @@ class ChessService {
         }
 
         try {
-            const capturedPiece = this.capturePieceIfAny(to);
-            if (capturedPiece) {
-                console.log(`Captured piece: ${capturedPiece}`);
-            }
-
+            this.capturePieceIfAny(to);
             piece.move(to, this.board);
             this.board[toFile][toRank] = piece;
             this.board[fromFile][fromRank] = null;

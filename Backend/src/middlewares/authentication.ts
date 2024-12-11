@@ -12,8 +12,6 @@ export function expressAuthentication(
             request.query.token ||
             request.headers["authorization"]?.split(' ')[1];
 
-        console.log("Extracted Token: ", token);
-
         return new Promise((resolve, reject) => {
             if (!token) {
                 reject(new Error("No token provided"));
@@ -28,7 +26,7 @@ export function expressAuthentication(
                         if (scopes !== undefined) {
                             const userScopes = decoded.scopes;
 
-                            for (let scope of scopes) {
+                            for (const scope of scopes) {
                                 const [resource, action] = scope.split(":");
                                 if (!userScopes[resource]?.includes(action)) {
                                     reject(new Error(`JWT does not contain required permission for ${scope}`));

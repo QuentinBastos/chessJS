@@ -40,8 +40,6 @@ export const movePiece = (req: Request, res: Response) => {
     const moveResult = chessService.movePiece(pieceId, toPosition);
 
     if (moveResult.success) {
-        console.log("success");
-        console.log(moveResult.message);
         res.json({
             success: true,
             board: chessService.getBoard(),
@@ -50,8 +48,6 @@ export const movePiece = (req: Request, res: Response) => {
             review: chessService.getReview(),
         });
     } else {
-        console.log("error");
-        console.log(moveResult.message);
         res.json({
             success: false,
             message: moveResult.message,
