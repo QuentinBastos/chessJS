@@ -80,8 +80,17 @@
         </ul>
         <div v-if="isKingInCheckmate">King is in check!</div>
       </div>
+      <h3>Captured White Pieces:</h3>
+      <div v-for="(piece, index) in capturedWhitePieces" :key="index">
+        <img :src="getImageSrc(piece.type, piece.color)" :alt="`Captured White Piece ${index}`" />
+      </div>
+
+      <h3>Captured Black Pieces:</h3>
+      <div v-for="(piece, index) in capturedBlackPieces" :key="index">
+        <img :src="getImageSrc(piece.type, piece.color)" :alt="`Captured Black Piece ${index}`" />
+      </div>
     </div>
-    <div v-if="isStaleMate || isCheck || isKingInCheckmate" id="popup-modal" tabindex="-1" class="absolute overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div v-if="isCheck || isKingInCheckmate || isStaleMate" id="popup-modal" tabindex="-1" class="fixed top-0 left-0 w-full h-full flex items-center justify-center">
       <div class="relative p-4 w-full max-w-md max-h-full">
         <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
           <button v-if="isKingInCheckmate" type="button" class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" @click="closeModal">
@@ -93,7 +102,10 @@
             <svg class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
             </svg>
-            <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">{{ textModal }}</h3>
+            <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400" v-html="textModal"></h3>
+          </div>
+          <div v-if="isKingInCheckmate" class="flex justify-center p-4 space-x-4 bg-gray-100 dark:bg-gray-800">
+            <button @click="backToMenu" class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600">Revenir au menu principale</button>
           </div>
         </div>
       </div>
@@ -102,6 +114,7 @@
 </template>
 <script setup lang="ts">
 import {ref, onMounted, computed} from "vue";
+import { useRouter } from "vue-router";
 import axios from "axios";
 import {ChessColor, ChessFigure} from "@/../../Backend/src/interface/ChessFigure";
 import {
@@ -113,11 +126,11 @@ import {
   API_ROOT_URL,
   API_INIT_BOARD_URL,
   API_GAMES_URL,
-  PAWN,
-} from "../../constants";
+} from "@/constants";
 
 import AsideHome from "@/components/home/aside.vue";
 
+const router = useRouter();
 const board = ref<(ChessFigure | null)[][] | null>(null);
 const draggedPiece = ref<{ row: number; col: number } | null>(null);
 const currentTurn = ref<ChessColor>(ChessColor.White);
@@ -128,20 +141,19 @@ const isStaleMate = ref(false);
 const isCheck = ref(false);
 const review = ref(['']);
 const textModal = ref('');
-const showPromotionModal = ref(false);
-const selectedPromotion = ref('QUEEN');
-const promotionPieceId = ref<number | null>(null);
-const promotionPosition = ref<[number, number] | null>(null);
 const errorMessage = ref<{ title: string, message: string }[]>([]);
+const modalTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
+const capturedPieces = ref<ChessFigure[]>([]);
 
 const loadBoard = async () => {
   try {
     const response = await axios.get(API_URL + API_ROOT_URL + API_BOARD_URL);
-    board.value = response.data;
-    console.log("Board:", board.value);
+    capturedPieces.value = response.data.capturedPieces;
+    review.value = response.data.review;
+    board.value = response.data.board;
+    currentTurn.value = response.data.currentTurn;
   } catch (error) {
-    console.error("Error fetching board:", error);
-  }
+    errorMessage.value.push({title: "Error fetching board", message: error});}
 };
 
 const groupedReviews = computed(() => {
@@ -158,9 +170,11 @@ const initBoard = async () => {
     highlightedMoves.value = [];
     currentTurn.value = ChessColor.White;
     isKingInCheckmate.value = false;
+    isStaleMate.value = false;
+    isCheck.value = false;
+    capturedPieces.value = [];
     const response = await axios.get(API_URL + API_ROOT_URL + API_INIT_BOARD_URL);
     board.value = response.data;
-    console.log("Board:", board.value);
   } catch (error) {
     errorMessage.value.push({title: "Error fetching board", message: error});
   }
@@ -237,25 +251,22 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
     try {
       const response = await movePiece(pieceId, toPosition);
       if (response && response.success) {
-        reviewList.value.push(pieceId + ':' + toPosition)
+        review.value = response.review;
         board.value = response.board;
         currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
-
-        const piece = board.value![row][col];
-        if (piece && piece.type === PAWN && (row === 0 || row === 7)) {
-          showPromotionModal.value = true;
-          promotionPieceId.value = pieceId;
-          promotionPosition.value = toPosition;
-        }
+        capturedPieces.value = response.capturedPieces;
 
         const stateResponse = await stateGame();
         if (stateResponse.isInCheck && !stateResponse.movePossible) {
-          console.log("King is in checkmate!");
           isKingInCheckmate.value = true;
+          showModal("King is in checkmate! <br> Game Over! <br> Winner: " + currentTurn.value);
+          await finish();
         } else if (stateResponse.isInCheck && stateResponse.movePossible) {
           isCheck.value = true;
+          showModal("King is in check! <br> Move!");
         } else if (!stateResponse.isInCheck && !stateResponse.movePossible) {
           isStaleMate.value = true;
+          showModal("Stalemate! <br> Game Over! <br> Draw!");
         } else {
           isKingInCheckmate.value = false;
         }
@@ -274,17 +285,6 @@ const onPieceClick = async (piece: ChessFigure) => {
   }
 };
 
-const promotePawn = () => {
-  // TODO implement promotion
-  if (promotionPieceId.value !== null && promotionPosition.value !== null) {
-    const [toFile, toRank] = promotionPosition.value;
-    const newType = selectedPromotion.value;
-    board.value![toFile][toRank] = new ChessFigure(promotionPieceId.value, newType, promotionPosition.value, currentTurn.value);
-    showPromotionModal.value = false;
-  }
-};
-
-
 const isHighlighted = (row: number, col: number): boolean => {
   return highlightedMoves.value.some((move) => move[0] === row && move[1] === col);
 };
@@ -293,18 +293,24 @@ const removeAlert = (index: number) => {
   errorMessage.value.splice(index, 1);
 };
 
-const closeModal = () => {
-  // TODO implement close modal
-  if (isKingInCheckmate.value) {
-    textModal.value = "King is in checkmate!";
-  } else {
-    setTimeout(() => {
-      textModal.value = "";
-      isStaleMate.value = false;
-      isCheck.value = false;
-      isKingInCheckmate.value = false;
-    }, 1000);
+const showModal = (message: string) => {
+  textModal.value = message;
+  if (!isKingInCheckmate.value) {
+    modalTimeout.value = setTimeout(() => {
+      closeModal();
+    }, 1500);
   }
+};
+
+const closeModal = () => {
+  if (modalTimeout.value) {
+    clearTimeout(modalTimeout.value);
+    modalTimeout.value = null;
+  }
+  textModal.value = "";
+  isStaleMate.value = false;
+  isCheck.value = false;
+  isKingInCheckmate.value = false;
 };
 
 async function finish() {
@@ -320,6 +326,18 @@ async function finish() {
     errorMessage.value.push({title: "Error finishing game", message: error.message || error});
   }
 }
+
+async function backToMenu() {
+  await router.push({path: '/'});
+}
+
+const capturedWhitePieces = computed(() => {
+  return capturedPieces.value.filter(piece => piece.color === ChessColor.White);
+});
+
+const capturedBlackPieces = computed(() => {
+  return capturedPieces.value.filter(piece => piece.color === ChessColor.Black);
+});
 
 onMounted(loadBoard);
 </script>
@@ -374,17 +392,6 @@ onMounted(loadBoard);
   pointer-events: none;
   scale: 0.5;
   filter: blur(6px);
-}
-
-.promotion-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
 }
 
 </style>
