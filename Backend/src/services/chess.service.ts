@@ -1,12 +1,18 @@
-import {ChessFigure, Rook, Knight, Bishop, Queen, King, Pawn, ChessColor} from '../interface';
-import {ROOK, KNIGHT, BISHOP, QUEEN, KING, PAWN} from '../constants';
+import {Bishop, ChessColor, ChessFigure, King, Knight, Pawn, Queen, Rook} from '../interface';
+import {BISHOP, KING, KNIGHT, PAWN, QUEEN, ROOK} from '../constants';
 
 class ChessService {
     private readonly board: (ChessFigure | null)[][];
+    private capturedPieces: ChessFigure[];
+    private review: string[] = [];
+    private currentTurn: ChessColor;
 
     constructor() {
         this.board = this.createEmptyBoard();
         this.initializeStandardChess();
+        this.capturedPieces = [];
+        this.review = [];
+        this.currentTurn = ChessColor.White;
     }
 
     private createEmptyBoard(): (ChessFigure | null)[][] {
@@ -62,6 +68,30 @@ class ChessService {
         return this.board;
     }
 
+    public getCapturedPieces(): ChessFigure[] {
+        return this.capturedPieces;
+    }
+
+    public setCapturedPieces(capturedPieces: ChessFigure[]): void {
+        this.capturedPieces = capturedPieces;
+    }
+
+    public getReview(): string[] {
+        return this.review;
+    }
+
+    public setReview(review: string[]): void {
+        this.review = review;
+    }
+
+    public getCurrentTurn(): ChessColor {
+        return this.currentTurn;
+    }
+
+    public setCurrentTurn(currentTurn: ChessColor): void {
+        this.currentTurn = currentTurn;
+    }
+
     public getPieceById(id: number): ChessFigure | null {
         for (let row = 0; row < this.board.length; row++) {
             for (let col = 0; col < this.board[row].length; col++) {
@@ -76,7 +106,7 @@ class ChessService {
 
     public checkMove(piece: ChessFigure): [number, number][] {
         const availablePositions: [number, number][] = [];
-
+        // TODO : store current turn in the state
         for (let row = 0; row < this.board.length; row++) {
             for (let col = 0; col < this.board[row].length; col++) {
                 const toPosition: [number, number] = [row, col];
@@ -92,34 +122,49 @@ class ChessService {
     public movePiece(pieceId: number, to: [number, number]): {
         success: boolean,
         message?: string,
-        board?: (ChessFigure | null)[][]
+        board?: (ChessFigure | null)[][],
+        capturedPieces?: ChessFigure[],
     } {
         const piece = this.getPieceById(pieceId);
         if (!piece) {
-            return {success: false, message: 'Piece not found'};
+            return { success: false, message: 'Piece not found' };
         }
 
         const [toFile, toRank] = to;
         const [fromFile, fromRank] = piece.position;
 
         if (!piece.isValidMove(to, this.board) || !piece.isKingSafeAfterMove(to, this.board)) {
-            return {success: false, message: 'Invalid move'};
+            return { success: false, message: 'Invalid move' };
         }
 
         try {
+            const capturedPiece = this.capturePieceIfAny(to);
+            if (capturedPiece) {
+                console.log(`Captured piece: ${capturedPiece}`);
+            }
+
             piece.move(to, this.board);
             this.board[toFile][toRank] = piece;
             this.board[fromFile][fromRank] = null;
 
-            if (piece.type === PAWN && (toRank === 0 || toRank === 7)) {
-                // TODO - Implement promotion
-                this.board[toFile][toRank] = new Queen(piece.id, QUEEN, [toFile, toRank], piece.color);
-            }
-            return {success: true, board: this.board};
+            this.currentTurn = this.currentTurn === ChessColor.White ? ChessColor.Black : ChessColor.White;
+
+            this.review.push(pieceId + ':' + to);
+
+            return { success: true, board: this.board, capturedPieces: this.capturedPieces };
         } catch (error) {
             console.error('Error moving piece:', error);
-            return {success: false, message: 'Internal Server Error'};
+            return { success: false, message: 'Internal Server Error' };
         }
+    }
+
+    public capturePieceIfAny(toPosition: [number, number]): ChessFigure | null {
+        const [toFile, toRank] = toPosition;
+        const targetPiece = this.board[toFile][toRank];
+        if (targetPiece) {
+            this.capturedPieces.push(targetPiece);
+        }
+        return targetPiece;
     }
 
     public stateGame(color: ChessColor, board: (ChessFigure | null)[][]): [boolean, boolean] {
@@ -162,7 +207,6 @@ class ChessService {
             }
             if (movePossible) break;
         }
-        console.log('isInCheck:', isInCheck, 'movePossible:', movePossible);
         return [isInCheck, movePossible];
     }
 }

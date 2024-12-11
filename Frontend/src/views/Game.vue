@@ -46,6 +46,15 @@
         <p>Current Turn: {{ review }}</p>
         <div v-if="isKingInCheckmate">King is in check!</div>
       </div>
+      <h3>Captured White Pieces:</h3>
+      <div v-for="(piece, index) in capturedWhitePieces" :key="index">
+        <img :src="getImageSrc(piece.type, piece.color)" :alt="`Captured White Piece ${index}`" />
+      </div>
+
+      <h3>Captured Black Pieces:</h3>
+      <div v-for="(piece, index) in capturedBlackPieces" :key="index">
+        <img :src="getImageSrc(piece.type, piece.color)" :alt="`Captured Black Piece ${index}`" />
+      </div>
     </div>
     <div v-if="isCheck || isKingInCheckmate || isStaleMate" id="popup-modal" tabindex="-1" class="fixed top-0 left-0 w-full h-full flex items-center justify-center">
       <div class="relative p-4 w-full max-w-md max-h-full">
@@ -72,6 +81,7 @@
 <script setup lang="ts">
 import {ref, onMounted} from "vue";
 import { useRouter } from "vue-router";
+import { computed } from 'vue';
 import axios from "axios";
 import {ChessColor, ChessFigure} from "@/../../Backend/src/interface/ChessFigure";
 import {
@@ -83,7 +93,6 @@ import {
   API_ROOT_URL,
   API_INIT_BOARD_URL,
   API_GAMES_URL,
-  PAWN,
 } from "@/constants";
 
 import AsideHome from "@/components/home/aside.vue";
@@ -98,21 +107,19 @@ const isStaleMate = ref(false);
 const isCheck = ref(false);
 const review = ref(['']);
 const textModal = ref('');
-const showPromotionModal = ref(false);
-const selectedPromotion = ref('QUEEN');
-const promotionPieceId = ref<number | null>(null);
-const promotionPosition = ref<[number, number] | null>(null);
 const errorMessage = ref<{ title: string, message: string }[]>([]);
 const modalTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
+const capturedPieces = ref<ChessFigure[]>([]);
 
 const loadBoard = async () => {
   try {
     const response = await axios.get(API_URL + API_ROOT_URL + API_BOARD_URL);
-    board.value = response.data;
-    console.log("Board:", board.value);
+    capturedPieces.value = response.data.capturedPieces;
+    review.value = response.data.review;
+    board.value = response.data.board;
+    currentTurn.value = response.data.currentTurn;
   } catch (error) {
-    console.error("Error fetching board:", error);
-  }
+    errorMessage.value.push({title: "Error fetching board", message: error});}
 };
 
 const initBoard = async () => {
@@ -121,9 +128,11 @@ const initBoard = async () => {
     highlightedMoves.value = [];
     currentTurn.value = ChessColor.White;
     isKingInCheckmate.value = false;
+    isStaleMate.value = false;
+    isCheck.value = false;
+    capturedPieces.value = [];
     const response = await axios.get(API_URL + API_ROOT_URL + API_INIT_BOARD_URL);
     board.value = response.data;
-    console.log("Board:", board.value);
   } catch (error) {
     errorMessage.value.push({title: "Error fetching board", message: error});
   }
@@ -200,21 +209,16 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
     try {
       const response = await movePiece(pieceId, toPosition);
       if (response && response.success) {
-        review.value.push(pieceId + ':' + toPosition)
+        review.value = response.review;
         board.value = response.board;
         currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
-
-        const piece = board.value![row][col];
-        if (piece && piece.type === PAWN && (row === 0 || row === 7)) {
-          showPromotionModal.value = true;
-          promotionPieceId.value = pieceId;
-          promotionPosition.value = toPosition;
-        }
+        capturedPieces.value = response.capturedPieces;
 
         const stateResponse = await stateGame();
         if (stateResponse.isInCheck && !stateResponse.movePossible) {
           isKingInCheckmate.value = true;
           showModal("King is in checkmate! <br> Game Over! <br> Winner: " + currentTurn.value);
+          await finish();
         } else if (stateResponse.isInCheck && stateResponse.movePossible) {
           isCheck.value = true;
           showModal("King is in check! <br> Move!");
@@ -238,17 +242,6 @@ const onPieceClick = async (piece: ChessFigure) => {
     highlightedMoves.value = await getPossibleMoves(piece.id.toString());
   }
 };
-
-const promotePawn = () => {
-  // TODO implement promotion
-  if (promotionPieceId.value !== null && promotionPosition.value !== null) {
-    const [toFile, toRank] = promotionPosition.value;
-    const newType = selectedPromotion.value;
-    board.value![toFile][toRank] = new ChessFigure(promotionPieceId.value, newType, promotionPosition.value, currentTurn.value);
-    showPromotionModal.value = false;
-  }
-};
-
 
 const isHighlighted = (row: number, col: number): boolean => {
   return highlightedMoves.value.some((move) => move[0] === row && move[1] === col);
@@ -295,6 +288,14 @@ async function finish() {
 async function backToMenu() {
   await router.push({path: '/'});
 }
+
+const capturedWhitePieces = computed(() => {
+  return capturedPieces.value.filter(piece => piece.color === ChessColor.White);
+});
+
+const capturedBlackPieces = computed(() => {
+  return capturedPieces.value.filter(piece => piece.color === ChessColor.Black);
+});
 
 onMounted(loadBoard);
 </script>
@@ -347,17 +348,6 @@ onMounted(loadBoard);
   pointer-events: none;
   scale: 0.5;
   filter: blur(6px);
-}
-
-.promotion-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
 }
 
 </style>

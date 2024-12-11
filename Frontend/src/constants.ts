@@ -1,4 +1,6 @@
 export const QUEEN = 4;
+export const WHITE = "white";
+export const BLACK = "black";
 export const PAWN = 6;
 export const API_URL = "http://localhost:8000";
 export const API_ROOT_URL = "/api";
