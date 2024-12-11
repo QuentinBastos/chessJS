@@ -72,7 +72,7 @@
           <p>Commencer</p>
         </div>
         <p>Current Turn: {{ currentTurn }}</p>
-        <div @click="finish" class=" flex border w-full mt-4 rounded justify-center
+        <div @click="giveUp" class=" flex border w-full mt-4 rounded justify-center
           py-2 bg-neutral-800 text-white font-bold hover:opacity-75">
           <p>Abandonner</p>
         </div>
@@ -84,7 +84,7 @@
         <div v-if="isKingInCheckmate">King is in check!</div>
       </div>
     </div>
-    <div v-if="isCheck || isKingInCheckmate || isStaleMate" id="popup-modal" tabindex="-1"
+    <div v-if="isCheck || isKingInCheckmate || isStaleMate || hasGivenUp" id="popup-modal" tabindex="-1"
          class="fixed top-0 left-0 w-full h-full flex items-center justify-center">
       <div class="relative p-4 w-full max-w-md max-h-full">
         <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
@@ -104,7 +104,7 @@
             </svg>
             <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400" v-html="textModal"></h3>
           </div>
-          <div v-if="isKingInCheckmate" class="flex justify-center p-4 space-x-4 bg-gray-100 dark:bg-gray-800">
+          <div v-if="isKingInCheckmate || hasGivenUp" class="flex justify-center p-4 space-x-4 bg-gray-100 dark:bg-gray-800">
             <button @click="backToMenu"
                     class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600">Revenir au
               menu principale
@@ -139,8 +139,8 @@ const draggedPiece = ref<{ row: number; col: number } | null>(null);
 const currentTurn = ref<ChessColor>(ChessColor.White);
 const highlightedMoves = ref<[number, number][]>([]);
 const isKingInCheckmate = ref(false);
-const reviewList = ref(['']);
 const isStaleMate = ref(false);
+const hasGivenUp = ref(false);
 const isCheck = ref(false);
 const review = ref(['']);
 const textModal = ref('');
@@ -159,14 +159,6 @@ const loadBoard = async () => {
     errorMessage.value.push({title: "Error fetching board", message: error});
   }
 };
-
-const groupedReviews = computed(() => {
-  const pairs = [];
-  for (let i = 0; i < reviewList.length; i += 2) {
-    pairs.push([reviewList[i], reviewList[i + 1] || ""]);
-  }
-  return pairs;
-});
 
 const initBoard = async () => {
   try {
@@ -263,14 +255,14 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
         const stateResponse = await stateGame();
         if (stateResponse.isInCheck && !stateResponse.movePossible) {
           isKingInCheckmate.value = true;
-          showModal("King is in checkmate! <br> Game Over! <br> Winner: " + currentTurn.value);
+          showModal("Echec et mat ! <br> Partie perdu <br> Gagnant: " + currentTurn.value);
           await finish();
         } else if (stateResponse.isInCheck && stateResponse.movePossible) {
           isCheck.value = true;
-          showModal("King is in check! <br> Move!");
+          showModal("Le roi est en échec!");
         } else if (!stateResponse.isInCheck && !stateResponse.movePossible) {
           isStaleMate.value = true;
-          showModal("Stalemate! <br> Game Over! <br> Draw!");
+          showModal("Egalité! <br> Partie nulle");
         } else {
           isKingInCheckmate.value = false;
         }
@@ -299,7 +291,7 @@ const removeAlert = (index: number) => {
 
 const showModal = (message: string) => {
   textModal.value = message;
-  if (!isKingInCheckmate.value) {
+  if (isCheck.value) {
     modalTimeout.value = setTimeout(() => {
       closeModal();
     }, 1500);
@@ -315,7 +307,18 @@ const closeModal = () => {
   isStaleMate.value = false;
   isCheck.value = false;
   isKingInCheckmate.value = false;
+  hasGivenUp.value = false;
 };
+
+async function giveUp() {
+  try {
+    hasGivenUp.value = true;
+    showModal("Vous avez abandonné! <br> Game Over! <br> Winner: " + (currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White));
+    await finish();
+  } catch (error) {
+    errorMessage.value.push({title: "Error giving up", message: error.message || error});
+  }
+}
 
 async function finish() {
   try {
@@ -332,6 +335,7 @@ async function finish() {
 }
 
 async function backToMenu() {
+  await initBoard();
   await router.push({path: '/'});
 }
 
