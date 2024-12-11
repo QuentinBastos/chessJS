@@ -1,7 +1,7 @@
 <template>
   <div class="flex w-full h-screen overflow-hidden">
     <AsideHome/>
-    <div class="w-full bg-neutral-800 flex items-center justify-around h-full sm:gap-2 gap-8 px-8">
+    <div class="w-full bg-neutral-800 flex items-center justify-around h-full sm:gap-2 gap-8 px-8 selectedNone">
       <div class="flex flex-col w-full h-full justify-between">
         <div class="flex text-white font-bold flex gap-4 my-2 h-[10vh]">
           <img src="/images/player/car.png" width="48" height="48" alt="iconProfile"/>
@@ -98,12 +98,21 @@
             </svg>
             <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400" v-html="textModal"></h3>
           </div>
-          <div v-if="isKingInCheckmate || hasGivenUp" class="flex justify-center p-4 space-x-4 bg-gray-100 dark:bg-gray-800">
+          <div v-if="isKingInCheckmate || hasGivenUp || isStaleMate" class="flex justify-center p-4 space-x-4 bg-gray-100 dark:bg-gray-800">
             <button @click="backToMenu"
                     class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600">Revenir au
               menu principale
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="showPromotionModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div class="bg-white p-4 rounded shadow-lg">
+        <h3 class="text-lg font-bold mb-4">Promote Pawn</h3>
+        <div class="flex gap-4">
+          <img v-for="piece in promotionPieces" :key="piece.type" :src="getImageSrc(piece.type, piece.color)" :alt="piece.type"
+               @click="promotePawn(piece.type)" class="cursor-pointer" width="40px" height="40px"/>
         </div>
       </div>
     </div>
@@ -122,7 +131,12 @@ import {
   API_KING_CHECK_URL,
   API_ROOT_URL,
   API_INIT_BOARD_URL,
-  API_GAMES_URL, API_END_GAME_URL,
+  API_GAMES_URL,
+  API_END_GAME_URL,
+  QUEEN,
+  ROOK,
+  BISHOP,
+  KNIGHT, API_PROMOTION_URL,
 } from "@/constants";
 
 import AsideHome from "@/components/home/aside.vue";
@@ -142,6 +156,15 @@ const textModal = ref('');
 const errorMessage = ref<{ title: string, message: string }[]>([]);
 const modalTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 const capturedPieces = ref<ChessFigure[]>([]);
+const showPromotionModal = ref(false);
+const promotionRow = ref<number | null>(null);
+const promotionCol = ref<number | null>(null);
+const promotionPieces = ref([
+  { type: QUEEN, color: currentTurn.value },
+  { type: ROOK, color: currentTurn.value },
+  { type: BISHOP, color: currentTurn.value },
+  { type: KNIGHT, color: currentTurn.value },
+]);
 
 const loadBoard = async () => {
   try {
@@ -242,38 +265,77 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
     const toPosition: [number, number] = [row, col];
 
     if (pieceId === undefined) {
-      errorMessage.value.push({title: "Piece", message: "Invalid piece position"});
+      errorMessage.value.push({ title: "Piece", message: "Invalid piece position" });
       return;
     }
 
     try {
       const response = await movePiece(pieceId, toPosition);
-      if (response && response.success) {
+      if (response && response.success) { // Access the success property from response.data
         review.value = response.review;
         board.value = response.board;
         currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
         capturedPieces.value = response.capturedPieces;
 
-        const stateResponse = await stateGame();
-        if (stateResponse.isInCheck && !stateResponse.movePossible) {
-          isKingInCheckmate.value = true;
-          showModal("Echec et mat ! <br> Partie perdu <br> Gagnant: " + currentTurn.value);
-          await finish();
-        } else if (stateResponse.isInCheck && stateResponse.movePossible) {
-          isCheck.value = true;
-          showModal("Le roi est en échec!");
-        } else if (!stateResponse.isInCheck && !stateResponse.movePossible) {
-          isStaleMate.value = true;
-          showModal("Egalité! <br> Partie nulle");
+        if (response.promotion) {
+          showPromotionModal.value = true;
+          promotionRow.value = row;
+          promotionCol.value = col;
         } else {
-          isKingInCheckmate.value = false;
+          const stateResponse = await stateGame();
+          if (stateResponse.isInCheck && !stateResponse.movePossible) {
+            isKingInCheckmate.value = true;
+            showModal("Echec et mat ! <br> Partie perdu <br> Gagnant: " + currentTurn.value);
+            await finish();
+          } else if (stateResponse.isInCheck && stateResponse.movePossible) {
+            isCheck.value = true;
+            showModal("Le roi est en échec!");
+            await finish();
+          } else if (!stateResponse.isInCheck && !stateResponse.movePossible) {
+            isStaleMate.value = true;
+            showModal("Egalité! <br> Partie nulle");
+            await finish();
+          } else {
+            isKingInCheckmate.value = false;
+          }
         }
       }
     } catch (error) {
-      errorMessage.value.push({title: "Error moving piece", message: error});
+      errorMessage.value.push({ title: "Error moving piece", message: error });
     }
     draggedPiece.value = null;
     highlightedMoves.value = [];
+  }
+};
+
+const promotePawn = async (type: number) => {
+  console.log(promotionRow.value, promotionCol.value);
+  if (promotionRow.value !== null && promotionCol.value !== null) {
+    const pieceId = board.value![promotionRow.value][promotionCol.value]?.id;
+    if (pieceId === undefined) {
+      errorMessage.value.push({ title: "Error", message: "Invalid piece position" });
+      return;
+    }
+    console.log(type)
+
+    try {
+      const response = await axios.post(`${API_URL}${API_ROOT_URL}${API_PROMOTION_URL}`, {
+        pieceId,
+        pieceType: type,
+      });
+      //TODO check state of game after promotion + change current turn
+
+      if (response && response.data.success) {
+        console.log(response.data);
+        board.value = response.data.board;
+        currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
+        showPromotionModal.value = false;
+        promotionRow.value = null;
+        promotionCol.value = null;
+      }
+    } catch (error) {
+      errorMessage.value.push({ title: "Error promoting pawn", message: error });
+    }
   }
 };
 
@@ -368,9 +430,6 @@ onUnmounted(giveUp);
   border: 0.15em solid black;
   aspect-ratio: 1;
   border-radius: 1%;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
 }
 
 .row {
@@ -409,6 +468,13 @@ onUnmounted(giveUp);
   pointer-events: none;
   scale: 0.5;
   filter: blur(6px);
+}
+
+.selectedNone {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 </style>

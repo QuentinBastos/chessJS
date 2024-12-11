@@ -133,6 +133,7 @@ class ChessService {
         message?: string,
         board?: (ChessFigure | null)[][],
         capturedPieces?: ChessFigure[],
+        promotion?: boolean,
     } {
         const piece = this.getPieceById(pieceId);
         if (!piece) {
@@ -141,6 +142,7 @@ class ChessService {
 
         const [toFile, toRank] = to;
         const [fromFile, fromRank] = piece.position;
+        const isPromotion = piece.type === PAWN && ((piece.color === ChessColor.White && toRank === 7) || (piece.color === ChessColor.Black && toRank === 0));
 
         if (!piece.isValidMove(to, this.board) || !piece.isKingSafeAfterMove(to, this.board)) {
             return { success: false, message: 'Invalid move' };
@@ -152,8 +154,11 @@ class ChessService {
             this.board[toFile][toRank] = piece;
             this.board[fromFile][fromRank] = null;
 
-            this.currentTurn = this.currentTurn === ChessColor.White ? ChessColor.Black : ChessColor.White;
+            if (isPromotion) {
+                return { success: true, board: this.board, capturedPieces: this.capturedPieces, promotion: true };
+            }
 
+            this.currentTurn = this.currentTurn === ChessColor.White ? ChessColor.Black : ChessColor.White;
             this.review.push(pieceId + ':' + to);
 
             return { success: true, board: this.board, capturedPieces: this.capturedPieces };
@@ -213,6 +218,37 @@ class ChessService {
             if (movePossible) break;
         }
         return [isInCheck, movePossible];
+    }
+
+    public promotion(pieceId: number, type: number): { success: boolean, message?: string, board?: any } {
+        const piece = this.getPieceById(pieceId);
+
+        if (!piece) {
+            return { success: false, message: 'Piece not found' };
+        }
+
+        let newPiece: ChessFigure;
+        const [file, rank] = piece.position;
+
+        switch (type) {
+            case ROOK:
+                newPiece = new Rook(piece.id, ROOK, [file, rank], piece.color);
+                break;
+            case KNIGHT:
+                newPiece = new Knight(piece.id, KNIGHT, [file, rank], piece.color);
+                break;
+            case BISHOP:
+                newPiece = new Bishop(piece.id, BISHOP, [file, rank], piece.color);
+                break;
+            case QUEEN:
+                newPiece = new Queen(piece.id, QUEEN, [file, rank], piece.color);
+                break;
+            default:
+                return { success: false, message: 'Invalid piece type' };
+        }
+
+        this.board[file][rank] = newPiece;
+        return { success: true, board: this.board };
     }
 }
 
