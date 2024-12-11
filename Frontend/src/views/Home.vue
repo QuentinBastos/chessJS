@@ -1,7 +1,7 @@
 <template>
   <div class="flex w-full h-screen overflow-hidden">
     <AsideHome/>
-    <div class="w-[87%] bg-neutral-800 text-white font-bold py-10 px-[5%]">
+    <div class="w-full bg-neutral-800 text-white font-bold py-10 px-[5%]">
       <div class="flex">
         <img src="/images/illustration/board-chess.webp" alt="board chess"
              class="rounded-lg w-[46%] h-fit md:hidden lg:block">

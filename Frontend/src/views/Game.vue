@@ -1,19 +1,20 @@
 <template>
   <div class="flex w-full h-screen overflow-hidden">
     <AsideHome/>
-    <div class="w-[92%] bg-neutral-800 flex items-center justify-around h-full sm:gap-2 gap-8 px-8">
+    <div class="w-full bg-neutral-800 flex items-center justify-around h-full sm:gap-2 gap-8 px-8">
       <div class="flex flex-col w-full h-full justify-between">
         <div class="flex text-white font-bold flex gap-4 my-2 h-[10vh]">
           <img src="/images/player/car.png" width="48" height="48" alt="iconProfile"/>
-          <div>
-            <span>Modzi</span>
-            <span>(450)</span>
+          <div class="flex flex-col gap-1">
+            <div>
+              <span>Modzi</span>
+              <span>(450)</span>
+            </div>
+            <div class="flex">
+              <img v-for="(piece, index) in capturedWhitePieces" :key="index" :src="getImageSrc(piece.type, piece.color)" :alt="`Captured White Piece ${index}`" width="24px"
+                   height="24px"/>
+            </div>
           </div>
-          <ul class="flex-inline">
-            <li>
-              <img src="">
-            </li>
-          </ul>
         </div>
         <div class="flex justify-center h-[80vh]">
           <div class="chessboard h-full">
@@ -41,18 +42,20 @@
         </div>
         <div class="text-white font-bold flex gap-4 my-2 h-[10vh]">
           <img src="/images/player/car.png" width="48" height="48" alt="iconProfile"/>
-          <div>
-            <span>Modzi</span>
-            <span>(450)</span>
+          <div class="flex flex-col gap-1">
+            <div>
+              <span>Modzi</span>
+              <span>(450)</span>
+            </div>
+            <div class="flex">
+              <img v-for="(piece, index) in capturedBlackPieces" :key="index" :src="getImageSrc(piece.type, piece.color)" :alt="`Captured Black Piece ${index}`" width="24px"
+                   height="24px"/>
+            </div>
           </div>
-          <ul class="flex-inline">
-            <li>
-              <img src="">
-            </li>
-          </ul>
         </div>
       </div>
-      <div v-if="errorMessage.length" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 right-4 top-4 rounded absolute"
+      <div v-if="errorMessage.length"
+           class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 right-4 top-4 rounded absolute"
            role="alert">
         <strong class="font-bold">{{ errorMessage[0].title }}</strong>
         <br>
@@ -80,32 +83,32 @@
         </ul>
         <div v-if="isKingInCheckmate">King is in check!</div>
       </div>
-      <h3>Captured White Pieces:</h3>
-      <div v-for="(piece, index) in capturedWhitePieces" :key="index">
-        <img :src="getImageSrc(piece.type, piece.color)" :alt="`Captured White Piece ${index}`" />
-      </div>
-
-      <h3>Captured Black Pieces:</h3>
-      <div v-for="(piece, index) in capturedBlackPieces" :key="index">
-        <img :src="getImageSrc(piece.type, piece.color)" :alt="`Captured Black Piece ${index}`" />
-      </div>
     </div>
-    <div v-if="isCheck || isKingInCheckmate || isStaleMate" id="popup-modal" tabindex="-1" class="fixed top-0 left-0 w-full h-full flex items-center justify-center">
+    <div v-if="isCheck || isKingInCheckmate || isStaleMate" id="popup-modal" tabindex="-1"
+         class="fixed top-0 left-0 w-full h-full flex items-center justify-center">
       <div class="relative p-4 w-full max-w-md max-h-full">
         <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-          <button v-if="isKingInCheckmate" type="button" class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" @click="closeModal">
+          <button v-if="isKingInCheckmate" type="button"
+                  class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                  @click="closeModal">
             <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
             </svg>
           </button>
           <div class="p-4 md:p-5 text-center">
-            <svg class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+            <svg class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" aria-hidden="true"
+                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
             </svg>
             <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400" v-html="textModal"></h3>
           </div>
           <div v-if="isKingInCheckmate" class="flex justify-center p-4 space-x-4 bg-gray-100 dark:bg-gray-800">
-            <button @click="backToMenu" class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600">Revenir au menu principale</button>
+            <button @click="backToMenu"
+                    class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600">Revenir au
+              menu principale
+            </button>
           </div>
         </div>
       </div>
@@ -114,7 +117,7 @@
 </template>
 <script setup lang="ts">
 import {ref, onMounted, computed} from "vue";
-import { useRouter } from "vue-router";
+import {useRouter} from "vue-router";
 import axios from "axios";
 import {ChessColor, ChessFigure} from "@/../../Backend/src/interface/ChessFigure";
 import {
@@ -153,7 +156,8 @@ const loadBoard = async () => {
     board.value = response.data.board;
     currentTurn.value = response.data.currentTurn;
   } catch (error) {
-    errorMessage.value.push({title: "Error fetching board", message: error});}
+    errorMessage.value.push({title: "Error fetching board", message: error});
+  }
 };
 
 const groupedReviews = computed(() => {
