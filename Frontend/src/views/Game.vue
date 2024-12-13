@@ -271,7 +271,7 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
 
     try {
       const response = await movePiece(pieceId, toPosition);
-      if (response && response.success) { // Access the success property from response.data
+      if (response && response.success) {
         review.value = response.review;
         board.value = response.board;
         currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
@@ -290,7 +290,6 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
           } else if (stateResponse.isInCheck && stateResponse.movePossible) {
             isCheck.value = true;
             showModal("Le roi est en échec!");
-            await finish();
           } else if (!stateResponse.isInCheck && !stateResponse.movePossible) {
             isStaleMate.value = true;
             showModal("Egalité! <br> Partie nulle");
@@ -309,29 +308,40 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
 };
 
 const promotePawn = async (type: number) => {
-  console.log(promotionRow.value, promotionCol.value);
   if (promotionRow.value !== null && promotionCol.value !== null) {
     const pieceId = board.value![promotionRow.value][promotionCol.value]?.id;
     if (pieceId === undefined) {
       errorMessage.value.push({ title: "Error", message: "Invalid piece position" });
       return;
     }
-    console.log(type)
 
     try {
       const response = await axios.post(`${API_URL}${API_ROOT_URL}${API_PROMOTION_URL}`, {
         pieceId,
         pieceType: type,
       });
-      //TODO check state of game after promotion + change current turn
 
       if (response && response.data.success) {
-        console.log(response.data);
         board.value = response.data.board;
-        currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
         showPromotionModal.value = false;
         promotionRow.value = null;
         promotionCol.value = null;
+
+        const stateResponse = await stateGame();
+        if (stateResponse.isInCheck && !stateResponse.movePossible) {
+          isKingInCheckmate.value = true;
+          showModal("Echec et mat ! <br> Partie perdu <br> Gagnant: " + currentTurn.value);
+          await finish();
+        } else if (stateResponse.isInCheck && stateResponse.movePossible) {
+          isCheck.value = true;
+          showModal("Le roi est en échec!");
+        } else if (!stateResponse.isInCheck && !stateResponse.movePossible) {
+          isStaleMate.value = true;
+          showModal("Egalité! <br> Partie nulle");
+          await finish();
+        } else {
+          isKingInCheckmate.value = false;
+        }
       }
     } catch (error) {
       errorMessage.value.push({ title: "Error promoting pawn", message: error });

@@ -84,7 +84,6 @@ export const doEndGame = (req: Request, res: Response) => {
 
 export const doPromotion = (req: Request, res: Response) => {
     const { pieceId, pieceType } = req.body;
-    console.log(pieceId, pieceType);
     const promotionResult = chessService.promotion(pieceId, pieceType);
     if (promotionResult.success) {
         res.json({

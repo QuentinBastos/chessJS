@@ -154,12 +154,12 @@ class ChessService {
             this.board[toFile][toRank] = piece;
             this.board[fromFile][fromRank] = null;
 
+            this.currentTurn = this.currentTurn === ChessColor.White ? ChessColor.Black : ChessColor.White;
+            this.review.push(pieceId + ':' + to);
+
             if (isPromotion) {
                 return { success: true, board: this.board, capturedPieces: this.capturedPieces, promotion: true };
             }
-
-            this.currentTurn = this.currentTurn === ChessColor.White ? ChessColor.Black : ChessColor.White;
-            this.review.push(pieceId + ':' + to);
 
             return { success: true, board: this.board, capturedPieces: this.capturedPieces };
         } catch (error) {
