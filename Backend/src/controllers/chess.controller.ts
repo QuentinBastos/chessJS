@@ -14,7 +14,7 @@ export const getBoard = (req: Request, res: Response) => {
     res.json({ board, capturedPieces, review, currentTurn, isGameStarted });
 };
 
-export const initBoard = (req: Request, res: Response) => {
+export const getInitBoard = (req: Request, res: Response) => {
     chessService.initializeStandardChess();
     chessService.setReview([]);
     chessService.setCurrentTurn(ChessColor.White);
@@ -42,7 +42,7 @@ export const getPossibleMoves = (req: Request, res: Response) => {
     res.json(possibleMoves);
 };
 
-export const movePiece = (req: Request, res: Response) => {
+export const doMovePiece = (req: Request, res: Response) => {
     const { pieceId, toPosition } = req.body;
     const moveResult = chessService.movePiece(pieceId, toPosition);
 
@@ -53,6 +53,7 @@ export const movePiece = (req: Request, res: Response) => {
             capturedPieces: chessService.getCapturedPieces(),
             currentTurn: chessService.getCurrentTurn(),
             review: chessService.getReview(),
+            promotion: moveResult.promotion,
         });
     } else {
         res.json({
@@ -62,14 +63,14 @@ export const movePiece = (req: Request, res: Response) => {
     }
 };
 
-export const stateGame = (req: Request, res: Response) => {
+export const getStateGame = (req: Request, res: Response) => {
     const color = req.params.color as ChessColor;
     const board = chessService.getBoard();
     const [isInCheck, movePossible] = chessService.stateGame(color, board);
     res.json({ isInCheck, movePossible});
 };
 
-export const getEndGame = (req: Request, res: Response) => {
+export const doEndGame = (req: Request, res: Response) => {
     chessService.initializeStandardChess();
     chessService.setReview([]);
     chessService.setCurrentTurn(ChessColor.White);
@@ -80,4 +81,23 @@ export const getEndGame = (req: Request, res: Response) => {
 
     res.json({ isGameStarted });
 };
+
+export const doPromotion = (req: Request, res: Response) => {
+    const { pieceId, pieceType } = req.body;
+    const promotionResult = chessService.promotion(pieceId, pieceType);
+    if (promotionResult.success) {
+        res.json({
+            success: true,
+            board: chessService.getBoard(),
+            capturedPieces: chessService.getCapturedPieces(),
+            currentTurn: chessService.getCurrentTurn(),
+            review: chessService.getReview(),
+        });
+    } else {
+        res.json({
+            success: false,
+            message: promotionResult.message,
+        });
+    }
+}
 

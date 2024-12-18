@@ -1,7 +1,7 @@
 <template>
   <div class="flex w-full h-screen overflow-hidden">
     <AsideHome/>
-    <div class="w-full bg-neutral-800 flex items-center justify-around h-full sm:gap-2 gap-8 px-8">
+    <div class="w-full bg-neutral-800 flex items-center justify-around h-full sm:gap-2 gap-8 px-8 selectedNone">
       <div class="flex flex-col w-full h-full justify-between">
         <div class="flex text-white font-bold gap-4 my-2 h-[10vh]">
           <img src="/images/player/car.png" width="48" height="48" alt="iconProfile"/>
@@ -11,7 +11,8 @@
               <span>(450)</span>
             </div>
             <div class="flex">
-              <img v-for="(piece, index) in capturedWhitePieces" :key="index" :src="getImageSrc(piece.type, piece.color)" :alt="`Captured White Piece ${index}`" width="24px"
+              <img v-for="(piece, index) in capturedWhitePieces" :key="index"
+                   :src="getImageSrc(piece.type, piece.color)" :alt="`Captured White Piece ${index}`" width="24px"
                    height="24px"/>
             </div>
           </div>
@@ -48,7 +49,8 @@
               <span>(450)</span>
             </div>
             <div class="flex">
-              <img v-for="(piece, index) in capturedBlackPieces" :key="index" :src="getImageSrc(piece.type, piece.color)" :alt="`Captured Black Piece ${index}`" width="24px"
+              <img v-for="(piece, index) in capturedBlackPieces" :key="index"
+                   :src="getImageSrc(piece.type, piece.color)" :alt="`Captured Black Piece ${index}`" width="24px"
                    height="24px"/>
             </div>
           </div>
@@ -87,7 +89,7 @@
           <p>Current Turn: {{ currentTurn }}</p>
           <div v-if="isGameStarted" @click="giveUp" class=" flex border w-full mt-4 rounded justify-center
             py-2 bg-neutral-800 text-white font-bold hover:opacity-75">
-            <p>Abandonner</p>
+            <p>Abandon</p>
           </div>
         <div v-if="isKingInCheckmate">King is in check!</div>
       </div>
@@ -112,12 +114,23 @@
             </svg>
             <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400" v-html="textModal"></h3>
           </div>
-          <div v-if="isKingInCheckmate || hasGivenUp" class="flex justify-center p-4 space-x-4 bg-gray-100 dark:bg-gray-800">
+          <div v-if="isKingInCheckmate || hasGivenUp || isStaleMate"
+               class="flex justify-center p-4 space-x-4 bg-gray-100 dark:bg-gray-800">
             <button @click="backToMenu"
                     class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600">Revenir au
               menu principale
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="showPromotionModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div class="bg-white p-4 rounded shadow-lg">
+        <h3 class="text-lg font-bold mb-4">Promote Pawn</h3>
+        <div class="flex gap-4">
+          <img v-for="piece in promotionPieces" :key="piece.type" :src="getImageSrc(piece.type, piece.color)"
+               :alt="String(piece.type)"
+               @click="promotePawn(piece.type)" class="cursor-pointer" width="40px" height="40px"/>
         </div>
       </div>
     </div>
@@ -127,7 +140,7 @@
 import {ref, onMounted, computed, onUnmounted} from "vue";
 import {useRouter} from "vue-router";
 import axios from "axios";
-import {ChessColor, ChessFigure} from "@/../../Backend/src/interface/ChessFigure";
+import {ChessFigure} from "@/models/ChessFigure";
 import {
   API_URL,
   API_BOARD_URL,
@@ -137,8 +150,14 @@ import {
   API_ROOT_URL,
   API_INIT_BOARD_URL,
   API_GAMES_URL,
-  API_HISTORIES_URL,
   API_END_GAME_URL,
+  API_HISTORIES_URL,
+  QUEEN,
+  ROOK,
+  BISHOP,
+  KNIGHT,
+  API_PROMOTION_URL,
+  ChessColor,
 } from "@/constants";
 
 import AsideHome from "@/components/home/aside.vue";
@@ -160,6 +179,16 @@ const modalTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 const capturedPieces = ref<ChessFigure[]>([]);
 const isPrivate = ref(true);
 const nameRoom = ref('');
+const showPromotionModal = ref(false);
+const promotionRow = ref<number | null>(null);
+const promotionCol = ref<number | null>(null);
+const promotionPieces = ref([
+  {type: QUEEN, color: currentTurn.value},
+  {type: ROOK, color: currentTurn.value},
+  {type: BISHOP, color: currentTurn.value},
+  {type: KNIGHT, color: currentTurn.value},
+]);
+
 
 const loadBoard = async () => {
   try {
@@ -170,7 +199,7 @@ const loadBoard = async () => {
     currentTurn.value = response.data.currentTurn;
     isGameStarted.value = response.data.isGameStarted;
   } catch (error) {
-    errorMessage.value.push({title: "Error fetching board", message: error});
+    errorMessage.value.push({title: "Error fetching board", message: String(error)});
   }
 };
 
@@ -187,7 +216,7 @@ const initBoard = async () => {
     board.value = response.data.board;
     isGameStarted.value = response.data.isGameStarted;
   } catch (error) {
-    errorMessage.value.push({title: "Error fetching board", message: error});
+    errorMessage.value.push({title: "Error fetching board", message: String(error)});
   }
 };
 
@@ -198,7 +227,7 @@ const getPossibleMoves = async (pieceId: string) => {
     );
     return response.data;
   } catch (error: unknown) {
-    errorMessage.value.push({title: "Error move", message: error});
+    errorMessage.value.push({title: "Error move", message: String(error)});
     return [];
   }
 };
@@ -211,7 +240,7 @@ const movePiece = async (pieceId: number, toPosition: [number, number]) => {
     });
     return response.data;
   } catch (error) {
-    errorMessage.value.push({title: "Error fetching possible moves", message: error});
+    errorMessage.value.push({title: "Error fetching possible moves", message: String(error)});
     throw error;
   }
 };
@@ -223,7 +252,7 @@ const stateGame = async () => {
     );
     return response.data;
   } catch (error) {
-    errorMessage.value.push({title: "Error state game", message: error});
+    errorMessage.value.push({title: "Error state game", message: String(error)});
   }
 };
 
@@ -240,7 +269,7 @@ const onDragStart = async (event: DragEvent, row: number, col: number) => {
 
   const piece = board.value![row][col];
   if (piece && piece.color === currentTurn.value) {
-    draggedPiece.value = { row, col };
+    draggedPiece.value = {row, col};
     highlightedMoves.value = await getPossibleMoves(piece.id.toString());
   } else {
     event.preventDefault();
@@ -260,7 +289,7 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
     const toPosition: [number, number] = [row, col];
 
     if (pieceId === undefined) {
-      errorMessage.value.push({title: "Piece", message: "Invalid piece position"});
+      errorMessage.value.push({ title: "Piece", message: "Mauvaise position" });
       return;
     }
 
@@ -271,6 +300,56 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
         board.value = response.board;
         currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
         capturedPieces.value = response.capturedPieces;
+
+        if (response.promotion) {
+          showPromotionModal.value = true;
+          promotionRow.value = row;
+          promotionCol.value = col;
+        } else {
+          const stateResponse = await stateGame();
+          if (stateResponse.isInCheck && !stateResponse.movePossible) {
+            isKingInCheckmate.value = true;
+            showModal("Echec et mat ! <br> Partie perdu <br> Gagnant: " + currentTurn.value);
+            await finish();
+          } else if (stateResponse.isInCheck && stateResponse.movePossible) {
+            isCheck.value = true;
+            showModal("Le roi est en échec!");
+          } else if (!stateResponse.isInCheck && !stateResponse.movePossible) {
+            isStaleMate.value = true;
+            showModal("Egalité! <br> Partie nulle");
+            await finish();
+          } else {
+            isKingInCheckmate.value = false;
+          }
+        }
+      }
+    } catch (error) {
+      errorMessage.value.push({ title: "Error moving piece", message: String(error) });
+    }
+    draggedPiece.value = null;
+    highlightedMoves.value = [];
+  }
+};
+
+const promotePawn = async (type: number) => {
+  if (promotionRow.value !== null && promotionCol.value !== null) {
+    const pieceId = board.value![promotionRow.value][promotionCol.value]?.id;
+    if (pieceId === undefined) {
+      errorMessage.value.push({title: "Error", message: "Invalid piece position"});
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API_URL}${API_ROOT_URL}${API_PROMOTION_URL}`, {
+        pieceId,
+        pieceType: type,
+      });
+
+      if (response && response.data.success) {
+        board.value = response.data.board;
+        showPromotionModal.value = false;
+        promotionRow.value = null;
+        promotionCol.value = null;
 
         const stateResponse = await stateGame();
         if (stateResponse.isInCheck && !stateResponse.movePossible) {
@@ -283,15 +362,14 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
         } else if (!stateResponse.isInCheck && !stateResponse.movePossible) {
           isStaleMate.value = true;
           showModal("Egalité! <br> Partie nulle");
+          await finish();
         } else {
           isKingInCheckmate.value = false;
         }
       }
     } catch (error) {
-      errorMessage.value.push({title: "Error moving piece", message: error});
+      errorMessage.value.push({title: "Error promoting pawn", message: String(error)});
     }
-    draggedPiece.value = null;
-    highlightedMoves.value = [];
   }
 };
 
@@ -335,14 +413,13 @@ async function giveUp() {
     hasGivenUp.value = true;
     showModal("Vous avez abandonné! <br> Game Over! <br> Winner: " + (currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White));
     await finish();
-  } catch (error: any) {
-    errorMessage.value.push({title: "Error giving up", message: error.message });
+  } catch (error) {
+    errorMessage.value.push({title: "Error giving up", message: String(error)});
   }
 }
 
 async function finish() {
   try {
-    console.log("finish")
     const token = localStorage.getItem("jwt_token");
     const response = await axios.post(`${API_URL}${API_ROOT_URL}${API_END_GAME_URL}`);
     isGameStarted.value = response.data.isGameStarted;
@@ -373,10 +450,7 @@ async function finish() {
       }
     );
   } catch (error) {
-    errorMessage.value.push({
-      title: "Error finishing game",
-      message: error.response?.data?.message || error.message || error,
-    });
+    errorMessage.value.push({title: "Error finishing game", message: String(error)});
   }
 }
 
@@ -399,7 +473,7 @@ onMounted(loadBoard);
 
 
 <style scoped>
-.chessboard  {
+.chessboard {
   display: grid;
   justify-content: center;
   grid-template-rows: repeat(8, 1fr);
@@ -409,9 +483,6 @@ onMounted(loadBoard);
   border: 0.15em solid black;
   aspect-ratio: 1;
   border-radius: 1%;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
 }
 
 .row {
@@ -450,6 +521,13 @@ onMounted(loadBoard);
   pointer-events: none;
   scale: 0.5;
   filter: blur(6px);
+}
+
+.selectedNone {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 </style>

@@ -34,30 +34,30 @@ class ChessService {
 
         let idCounter = 1;
 
-        this.placePiece(new Rook(idCounter++, ROOK, [0, 0], ChessColor.White));
-        this.placePiece(new Knight(idCounter++, KNIGHT, [1, 0], ChessColor.White));
-        this.placePiece(new Bishop(idCounter++, BISHOP, [2, 0], ChessColor.White));
-        this.placePiece(new Queen(idCounter++, QUEEN, [3, 0], ChessColor.White));
-        this.placePiece(new King(idCounter++, KING, [4, 0], ChessColor.White));
-        this.placePiece(new Bishop(idCounter++, BISHOP, [5, 0], ChessColor.White));
-        this.placePiece(new Knight(idCounter++, KNIGHT, [6, 0], ChessColor.White));
-        this.placePiece(new Rook(idCounter++, ROOK, [7, 0], ChessColor.White));
+        this.placePiece(new Rook(idCounter++, ROOK, [0, 0], ChessColor.White, false));
+        this.placePiece(new Knight(idCounter++, KNIGHT, [1, 0], ChessColor.White, false));
+        this.placePiece(new Bishop(idCounter++, BISHOP, [2, 0], ChessColor.White, false));
+        this.placePiece(new Queen(idCounter++, QUEEN, [3, 0], ChessColor.White, false));
+        this.placePiece(new King(idCounter++, KING, [4, 0], ChessColor.White, false));
+        this.placePiece(new Bishop(idCounter++, BISHOP, [5, 0], ChessColor.White, false));
+        this.placePiece(new Knight(idCounter++, KNIGHT, [6, 0], ChessColor.White, false));
+        this.placePiece(new Rook(idCounter++, ROOK, [7, 0], ChessColor.White, false));
 
         for (let i = 0; i < 8; i++) {
-            this.placePiece(new Pawn(idCounter++, PAWN, [i, 1], ChessColor.White));
+            this.placePiece(new Pawn(idCounter++, PAWN, [i, 1], ChessColor.White, false));
         }
 
-        this.placePiece(new Rook(idCounter++, ROOK, [0, 7], ChessColor.Black));
-        this.placePiece(new Knight(idCounter++, KNIGHT, [1, 7], ChessColor.Black));
-        this.placePiece(new Bishop(idCounter++, BISHOP, [2, 7], ChessColor.Black));
-        this.placePiece(new Queen(idCounter++, QUEEN, [3, 7], ChessColor.Black));
-        this.placePiece(new King(idCounter++, KING, [4, 7], ChessColor.Black));
-        this.placePiece(new Bishop(idCounter++, BISHOP, [5, 7], ChessColor.Black));
-        this.placePiece(new Knight(idCounter++, KNIGHT, [6, 7], ChessColor.Black));
-        this.placePiece(new Rook(idCounter++, ROOK, [7, 7], ChessColor.Black));
+        this.placePiece(new Rook(idCounter++, ROOK, [0, 7], ChessColor.Black, false));
+        this.placePiece(new Knight(idCounter++, KNIGHT, [1, 7], ChessColor.Black, false));
+        this.placePiece(new Bishop(idCounter++, BISHOP, [2, 7], ChessColor.Black, false));
+        this.placePiece(new Queen(idCounter++, QUEEN, [3, 7], ChessColor.Black, false));
+        this.placePiece(new King(idCounter++, KING, [4, 7], ChessColor.Black, false));
+        this.placePiece(new Bishop(idCounter++, BISHOP, [5, 7], ChessColor.Black, false));
+        this.placePiece(new Knight(idCounter++, KNIGHT, [6, 7], ChessColor.Black, false));
+        this.placePiece(new Rook(idCounter++, ROOK, [7, 7], ChessColor.Black, false));
 
         for (let i = 0; i < 8; i++) {
-            this.placePiece(new Pawn(idCounter++, PAWN, [i, 6], ChessColor.Black));
+            this.placePiece(new Pawn(idCounter++, PAWN, [i, 6], ChessColor.Black, false));
         }
     }
 
@@ -124,7 +124,6 @@ class ChessService {
                 }
             }
         }
-
         return availablePositions;
     }
 
@@ -133,6 +132,7 @@ class ChessService {
         message?: string,
         board?: (ChessFigure | null)[][],
         capturedPieces?: ChessFigure[],
+        promotion?: boolean,
     } {
         const piece = this.getPieceById(pieceId);
         if (!piece) {
@@ -141,6 +141,7 @@ class ChessService {
 
         const [toFile, toRank] = to;
         const [fromFile, fromRank] = piece.position;
+        const isPromotion = piece.type === PAWN && ((piece.color === ChessColor.White && toRank === 7) || (piece.color === ChessColor.Black && toRank === 0));
 
         if (!piece.isValidMove(to, this.board) || !piece.isKingSafeAfterMove(to, this.board)) {
             return { success: false, message: 'Invalid move' };
@@ -153,8 +154,11 @@ class ChessService {
             this.board[fromFile][fromRank] = null;
 
             this.currentTurn = this.currentTurn === ChessColor.White ? ChessColor.Black : ChessColor.White;
-
             this.review.push(pieceId + ':' + to);
+
+            if (isPromotion) {
+                return { success: true, board: this.board, capturedPieces: this.capturedPieces, promotion: true };
+            }
 
             return { success: true, board: this.board, capturedPieces: this.capturedPieces };
         } catch (error) {
@@ -213,6 +217,37 @@ class ChessService {
             if (movePossible) break;
         }
         return [isInCheck, movePossible];
+    }
+
+    public promotion(pieceId: number, type: number): { success: boolean, message?: string, board?: (ChessFigure | null)[][] } {
+        const piece = this.getPieceById(pieceId);
+
+        if (!piece) {
+            return { success: false, message: 'Piece not found' };
+        }
+
+        let newPiece: ChessFigure;
+        const [file, rank] = piece.position;
+
+        switch (type) {
+            case ROOK:
+                newPiece = new Rook(piece.id, ROOK, [file, rank], piece.color, false);
+                break;
+            case KNIGHT:
+                newPiece = new Knight(piece.id, KNIGHT, [file, rank], piece.color, false);
+                break;
+            case BISHOP:
+                newPiece = new Bishop(piece.id, BISHOP, [file, rank], piece.color, false);
+                break;
+            case QUEEN:
+                newPiece = new Queen(piece.id, QUEEN, [file, rank], piece.color, false);
+                break;
+            default:
+                return { success: false, message: 'Invalid piece type' };
+        }
+
+        this.board[file][rank] = newPiece;
+        return { success: true, board: this.board };
     }
 }
 
