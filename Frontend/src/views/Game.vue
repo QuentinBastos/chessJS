@@ -136,7 +136,8 @@ import {
   QUEEN,
   ROOK,
   BISHOP,
-  KNIGHT, API_PROMOTION_URL,
+  KNIGHT,
+  API_PROMOTION_URL,
 } from "@/constants";
 
 import AsideHome from "@/components/home/aside.vue";

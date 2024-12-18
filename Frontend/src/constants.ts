@@ -1,3 +1,7 @@
+export enum ChessColor {
+    White = "white",
+    Black = "black",
+}
 export const ROOK = 1;
 export const KNIGHT = 2;
 export const BISHOP = 3;
