@@ -3,7 +3,7 @@
     <AsideHome/>
     <div class="w-full bg-neutral-800 flex items-center justify-around h-full sm:gap-2 gap-8 px-8">
       <div class="flex flex-col w-full h-full justify-between">
-        <div class="flex text-white font-bold flex gap-4 my-2 h-[10vh]">
+        <div class="flex text-white font-bold gap-4 my-2 h-[10vh]">
           <img src="/images/player/car.png" width="48" height="48" alt="iconProfile"/>
           <div class="flex flex-col gap-1">
             <div>
@@ -66,16 +66,30 @@
             d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
         </span>
       </div>
-      <div class="flex flex-col items-center w-2/3 gap-4">
+      <div class="flex flex-col w-1/3 bg-neutral-600 gap-4 rounded items-center px-4 py-6">
+        <h2 class="text-white font-bold text-3xl">Jouer</h2>
+        <div class="flex gap-2">
+          <div class="flex items-center rounded px-4" v-bind:style="!isPrivate ? {'background' : 'black'} :  {'background' : 'gray'}">
+            <input id="bordered-radio-1" type="radio" v-model="isPrivate" :value=false name="bordered-radio" class="w-4 h-4 hidden text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+            <label for="bordered-radio-1" class="w-full py-4 text-sm font-medium text-gray-900 dark:text-gray-300">Privé</label>
+          </div>
+          <div class="flex items-center rounded  bg-neutral-800 px-4" v-bind:style="isPrivate ? {'background' : 'black'} :  {'background' : 'gray'}">
+            <input checked id="bordered-radio-2" type="radio" v-model="isPrivate" :value=true name="bordered-radio" class="w-4 h-4 hidden text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+            <label for="bordered-radio-2" class="w-full py-4 text-sm font-medium text-gray-900 dark:text-gray-300">Public</label>
+          </div>
+        </div>
+        <label for="nameRoom" class="font-medium text-white">Nom partie </label>
+        <input id="nameRoom" type="text" v-model="nameRoom" class="w-2/3 shadow py-1 pl-1 rounded">
         <div v-if="!isGameStarted" @click="initBoard" class=" flex border w-full mt-4 rounded justify-center
-          py-2 bg-white text-black font-bold hover:opacity-75">
-          <p>Commencer</p>
-        </div>
-        <p>Current Turn: {{ currentTurn }}</p>
-        <div v-if="isGameStarted" @click="giveUp" class=" flex border w-full mt-4 rounded justify-center
-          py-2 bg-neutral-800 text-white font-bold hover:opacity-75">
-          <p>Abandonner</p>
-        </div>
+            py-2 bg-white text-black font-bold hover:opacity-75">
+            <p>Commencer</p>
+          </div>
+          <p>Current Turn: {{ currentTurn }}</p>
+          <div v-if="isGameStarted" @click="giveUp" class=" flex border w-full mt-4 rounded justify-center
+            py-2 bg-neutral-800 text-white font-bold hover:opacity-75">
+            <p>Abandonner</p>
+          </div>
+        <div v-if="isKingInCheckmate">King is in check!</div>
       </div>
     </div>
     <div v-if="isCheck || isKingInCheckmate || isStaleMate || hasGivenUp" id="popup-modal" tabindex="-1"
@@ -122,7 +136,9 @@ import {
   API_KING_CHECK_URL,
   API_ROOT_URL,
   API_INIT_BOARD_URL,
-  API_GAMES_URL, API_END_GAME_URL,
+  API_GAMES_URL,
+  API_HISTORIES_URL,
+  API_END_GAME_URL,
 } from "@/constants";
 
 import AsideHome from "@/components/home/aside.vue";
@@ -142,6 +158,8 @@ const textModal = ref('');
 const errorMessage = ref<{ title: string, message: string }[]>([]);
 const modalTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 const capturedPieces = ref<ChessFigure[]>([]);
+const isPrivate = ref(true);
+const nameRoom = ref('');
 
 const loadBoard = async () => {
   try {
@@ -324,20 +342,44 @@ async function giveUp() {
 
 async function finish() {
   try {
+    console.log("finish")
     const token = localStorage.getItem("jwt_token");
     const response = await axios.post(`${API_URL}${API_ROOT_URL}${API_END_GAME_URL}`);
     isGameStarted.value = response.data.isGameStarted;
 
-    await axios.post(`${API_URL}${API_GAMES_URL}`, {
-      name: 'test',
-      review: JSON.stringify(review.value),
-    }, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const gameResponse = await axios.post(
+      `${API_URL}${API_GAMES_URL}`,
+      {
+        name: nameRoom.value || 'echec',
+        review: JSON.stringify(review.value),
+        share: Number(isPrivate.value),
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const idGame = gameResponse.data.id;
+
+    const userId = JSON.parse(<string>localStorage.getItem("user")).id;
+    await axios.post(
+      `${API_URL}${API_HISTORIES_URL}`,
+      {
+        idUser: userId,
+        idGame: idGame,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
   } catch (error) {
-    errorMessage.value.push({title: "Error finishing game", message: error.message || error});
+    errorMessage.value.push({
+      title: "Error finishing game",
+      message: error.response?.data?.message || error.message || error,
+    });
   }
 }
+
 
 async function backToMenu() {
   await initBoard();
@@ -353,12 +395,11 @@ const capturedBlackPieces = computed(() => {
 });
 
 onMounted(loadBoard);
-onUnmounted(giveUp);
 </script>
 
 
 <style scoped>
-.chessboard {
+.chessboard  {
   display: grid;
   justify-content: center;
   grid-template-rows: repeat(8, 1fr);

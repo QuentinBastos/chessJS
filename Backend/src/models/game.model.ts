@@ -5,6 +5,7 @@ export interface GameAttributes {
     id?: number;
     name: string;
     review: string;
+    share: number;
 }
 
 export class Game
@@ -14,6 +15,7 @@ export class Game
     public id!: number;
     public name!: string;
     public review!: string;
+    public share!: number;
 }
 
 Game.init(
@@ -31,6 +33,9 @@ Game.init(
             type: DataTypes.STRING,
             allowNull: false,
         },
+        share: {
+            type: DataTypes.INTEGER,
+        }
 
     },
     {

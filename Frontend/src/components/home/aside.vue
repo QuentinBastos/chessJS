@@ -7,7 +7,7 @@
     />
     <label
       for="menu-toggle"
-      class="cursor-pointer p-3 text-white bg-neutral-800 sm:hidden peer-checked:hidden"
+      class="cursor-pointer p-3 text-white bg-neutral-800 sm:hidden peer-checked:hidden md:min-w-[200px]"
     >
       <svg
         class="w-6 h-6"
@@ -25,7 +25,7 @@
       </svg>
     </label>
 
-    <aside class="bg-neutral-900 lg:min-w-fit h-full relative overflow-y-auto z-10 hidden peer-checked:block sm:block">
+    <aside class="bg-neutral-900 h-full relative overflow-y-auto z-10 hidden peer-checked:block sm:block lg:min-w-[200px]">
       <label
         for="menu-toggle"
         class="flex items-center justify-center top-3 right-3 cursor-pointer p-2 text-white sm:hidden"
@@ -66,7 +66,7 @@
           <p class="hidden lg:flex">Apprendre</p>
         </li>
         <li class="flex hover:bg-neutral-600 cursor-pointer lg:justify-start justify-center">
-          <router-link class="flex items-center gap-4 px-3 py-2" to="/history">
+          <router-link class="flex items-center gap-4 px-3 py-2" :to="'/history/'+ storedUser?.id">
             <img src="/images/icons/binoculars.png" alt="LocalChess" class="w-[36px]">
             <p class="hidden lg:flex">Historique</p>
           </router-link>
@@ -77,9 +77,11 @@
           <p class="hidden lg:flex">Info</p>
         </li>
         <li
-          class="flex items-center gap-4 px-3 py-2 hover:bg-neutral-600 cursor-pointer lg:justify-start justify-center">
-          <img src="/images/icons/social-care.png" alt="LocalChess" class="w-[36px]">
-          <p class="hidden lg:flex">Social</p>
+          class="flex hover:bg-neutral-600 cursor-pointer lg:justify-start justify-center">
+          <router-link class="flex items-center gap-4 px-3 py-2" to="/leaderboard">
+            <img src="/images/icons/trophy.png" alt="trophy" class="w-[36px]">
+            <p class="hidden lg:flex">LeaderBoard</p>
+          </router-link>
         </li>
         <li
           class="flex items-center gap-4 px-3 py-2 hover:bg-neutral-600 cursor-pointer lg:justify-start justify-center">
@@ -122,6 +124,7 @@
 <script setup>
 import navButton from "@/components/tools/button.vue";
 import {onMounted, ref} from "vue";
+import LeaderBoard from "@/views/LeaderBoard.vue";
 
 const storedUser = ref();
 

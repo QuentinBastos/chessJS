@@ -35,8 +35,8 @@ export class GameController extends Controller {
     public async createGame(
         @Body() requestBody: GameInputDTO
     ): Promise<GameOutputDTO> {
-        const { name, review } = requestBody;
-        return await gameService.createGame(name, review);
+        const { name, review, share } = requestBody;
+        return await gameService.createGame(name, review, share);
     }
 
     @Delete("{id}")
@@ -49,7 +49,7 @@ export class GameController extends Controller {
         @Path() id: number,
         @Body() requestBody: GameInputPatchDTO
     ): Promise<GameOutputDTO> {
-        const { name, review } = requestBody;
-        return await gameService.updateGame(id, <string>name, <string>review);
+        const { name, review, share } = requestBody;
+        return await gameService.updateGame(id, <string>name, <string>review, <number>share);
     }
 }

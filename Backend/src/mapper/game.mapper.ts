@@ -7,6 +7,7 @@ export class GameMapper {
             id: game.id,
             name: game.name,
             review: game.review,
+            share: game.share,
         };
     }
 

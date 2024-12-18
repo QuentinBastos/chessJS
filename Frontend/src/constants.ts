@@ -10,4 +10,6 @@ export const API_POSSIBLES_MOVES_URL = "/possible-moves/:id";
 export const API_MOVE_PIECE_URL = "/move-pieces";
 export const API_KING_CHECK_URL = "/is-king-in-check/:color";
 export const API_GAMES_URL = "/games";
+export const API_USERS_URL = "/users";
+export const API_HISTORIES_URL = "/histories";
 export const API_END_GAME_URL = "/end-game";

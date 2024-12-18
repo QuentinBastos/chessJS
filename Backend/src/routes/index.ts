@@ -89,6 +89,7 @@ const models: TsoaRoute.Models = {
             "id": {"dataType":"double","required":true},
             "name": {"dataType":"string","required":true},
             "review": {"dataType":"string","required":true},
+            "share": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },
@@ -98,6 +99,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "name": {"dataType":"string","required":true},
             "review": {"dataType":"string","required":true},
+            "share": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },
@@ -107,6 +109,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "name": {"dataType":"string"},
             "review": {"dataType":"string"},
+            "share": {"dataType":"double"},
         },
         "additionalProperties": false,
     },

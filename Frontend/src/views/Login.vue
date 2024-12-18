@@ -49,7 +49,6 @@ const login = async () => {
 
 
     const {token} = response.data;
-    console.log(token)
     localStorage.setItem("jwt_token", token[0]);
     const user = {id: token[1], username: token[2], email: token[3]};
     localStorage.setItem("user", JSON.stringify(user));

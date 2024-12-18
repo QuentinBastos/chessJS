@@ -1,26 +1,49 @@
 <template>
-  <div>
-    <button @click="loadBoard">Load Board</button>
-    <p>Current Turn: {{ currentTurn }}</p>
-    <div class="chessboard">
-      <div v-for="(row, rowIndex) in board" :key="rowIndex" class="row">
-        <div
-          v-for="(cell, cellIndex) in row"
-          :key="cellIndex"
-          :class="['cell']"
-        >
-          <img
-            class="piece"
-            v-if="cell"
-            :src="getImageSrc(cell.type, cell.color)"
-            :alt="`Piece ${cell.id}`"
-          />
+  <div class="flex h-screen ">
+    <AsideHome/>
+    <div class="h-screen bg-neutral-800 w-full flex items-center justify-center  px-4">
+      <div class="flex flex-col items-center justify-center gap-6 w-3/4">
+        <div class="chessboard h-[80vh] items-center">
+          <div v-for="(row, rowIndex) in board" :key="rowIndex" class="row">
+            <div
+              v-for="(cell, cellIndex) in row"
+              :key="cellIndex"
+              :class="[ 'cell', (rowIndex + cellIndex) % 2 === 0 ? 'bg-[#54769a] ' : 'bg-blue-50']"
+              @drop="onDrop($event, rowIndex, cellIndex)"
+              @dragover="onDragOver($event)"
+            >
+              <img
+                class="piece"
+                v-if="cell"
+                :src="getImageSrc(cell.type, cell.color)"
+                :alt="`Piece ${cell.id}`"
+                :draggable="cell.color === currentTurn"
+                @dragstart="onDragStart($event, rowIndex, cellIndex)"
+                @click="onPieceClick(cell)"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="flex w-full justify-center">
+          <div class="w-2/3 flex justify-around">
+            <button @click="previousMove" :disabled="currentMoveIndex <= 0" class="flex bg-black text-white py-2 px-4 rounded font-bold">⟵ Reculer</button>
+            <button @click="nextMove" :disabled="currentMoveIndex >= review.length" class="flex bg-white py-2 px-4 rounded font-bold">Avancer ⟶</button>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="controls">
-      <button @click="previousMove" :disabled="currentMoveIndex <= 0">⟵ Reculer</button>
-      <button @click="nextMove" :disabled="currentMoveIndex >= review.length - 1">Avancer ⟶</button>
+      <div class="flex flex-col w-1/4 bg-white gap-4 rounded items-center px-4 pt-2">
+        <h2 class="text-neutral-800 font-bold text-3xl">Remacth</h2>
+        <div class="bg-neutral-700 rounded mb-4 w-full h-[20vh]">
+          <ul class="grid grid-cols-2 lg:grid-cols-3 text-white h-auto">
+            <li class="flex gap-2 w-fit" v-for="reviewrange in currentMoveIndex" >
+              <p> {{ currentMoveIndex.value }}</p>
+              <p v-if="currentMoveIndex <= 1 "> </p>
+              <p v-else> ⟶ </p>
+              <p>{{ review[reviewrange - 1] }}</p>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -28,9 +51,10 @@
 <script setup lang="ts">
 import axios from "axios";
 import {ChessColor, ChessFigure} from "@/../../Backend/src/interface/ChessFigure";
-import {API_BOARD_URL, API_ROOT_URL, API_URL} from "@/constants";
+import { API_GAMES_URL, API_INIT_BOARD_URL, API_ROOT_URL, API_URL} from "@/constants";
 import {onMounted, ref} from "vue";
 import {useRoute} from "vue-router"
+import AsideHome from "@/components/home/aside.vue";
 
 const currentTurn = ref<ChessColor>(ChessColor.White);
 const review = ref<string[]>([])
@@ -41,7 +65,7 @@ const route = useRoute();
 onMounted(async () => {
   const token = localStorage.getItem("jwt_token");
   const gameId = route.params.id;
-  const response = await axios.get(`${API_URL}/games/${gameId}`, {
+  const response = await axios.get(`${API_URL}${API_GAMES_URL}/${gameId}`, {
     headers: {Authorization: `Bearer ${token}`}
   });
   review.value = JSON.parse(response.data.review);
@@ -50,8 +74,8 @@ onMounted(async () => {
 
 const loadBoard = async () => {
   try {
-    const response = await axios.get(API_URL + API_ROOT_URL + API_BOARD_URL);
-    board.value = response.data;
+    const response = await axios.get(API_URL + API_ROOT_URL + API_INIT_BOARD_URL);
+    board.value = response.data.board;
   } catch (error) {
     console.error("Error fetching board:", error);
   }
@@ -122,9 +146,13 @@ const parseMove = (move: string): [number, [number, number]] => {
 .chessboard {
   display: grid;
   justify-content: center;
-  grid-template-columns: repeat(8, 50px);
-  grid-template-rows: repeat(8, 50px);
+  grid-template-rows: repeat(8, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   transform: rotate(-90deg);
+  outline: 0.25em solid white;;
+  border: 0.15em solid black;
+  aspect-ratio: 1;
+  border-radius: 1%;
 }
 
 .row {
@@ -132,22 +160,19 @@ const parseMove = (move: string): [number, [number, number]] => {
 }
 
 .cell {
+  position: relative;
   transform: rotate(90deg);
-  background: white;
-  width: 50px;
-  height: 50px;
-  border: 1px solid black;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.cell span {
-  color: black;
-}
 
 .piece {
-  height: 40px;
-  width: 40px;
+  padding: 12.5%;
+  height: 100%;
+  width: 100%;
 }
 </style>

@@ -23,9 +23,10 @@ export class GameService {
     public async createGame(
         name: string,
         review: string,
+        share: number,
     ): Promise<GameOutputDTO> {
         return GameMapper.toOutputDto(
-            await Game.create({ name: name ,review: review }),
+            await Game.create({ name: name ,review: review, share: share }),
         );
     }
 
@@ -42,11 +43,13 @@ export class GameService {
         id: number,
         name: string,
         review: string,
+        share: number,
     ): Promise<GameOutputDTO> {
         const game = await Game.findByPk(id);
         if (game) {
             if (name) game.name = name;
             if (review) game.review = review;
+            if (share) game.share = share
             await game.save();
             return GameMapper.toOutputDto(game);
         } else {

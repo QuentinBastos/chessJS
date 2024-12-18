@@ -5,6 +5,7 @@ import Register from "@/views/Register.vue";
 import Game from "@/views/Game.vue";
 import History from "@/views/History.vue";
 import Review from "@/views/Review.vue";
+import LeaderBoard from "@/views/LeaderBoard.vue";
 
 const routes = [
   {
@@ -34,9 +35,14 @@ const routes = [
     props: true,
   },
   {
-    path: "/history",
+    path: "/history/:id",
     name: "History",
     component: History,
+  },
+  {
+    path: "/leaderboard",
+    name: "LeaderBoard",
+    component: LeaderBoard,
   },
 ];
 
