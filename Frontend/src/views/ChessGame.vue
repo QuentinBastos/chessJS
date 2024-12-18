@@ -282,8 +282,6 @@ const onDragOver = (event: DragEvent) => {
 
 const onDrop = async (event: DragEvent, row: number, col: number) => {
   event.preventDefault();
-  const audio = new Audio('/sounds/move-piece.mp3');
-  await audio.play();
   if (draggedPiece.value) {
     const fromRow = draggedPiece.value.row;
     const fromCol = draggedPiece.value.col;
@@ -302,6 +300,9 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
         board.value = response.board;
         currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
         capturedPieces.value = response.capturedPieces;
+
+        const audio = new Audio('/sounds/move-piece.mp3');
+        await audio.play();
 
         if (response.promotion) {
           showPromotionModal.value = true;
