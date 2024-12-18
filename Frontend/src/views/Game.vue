@@ -142,7 +142,7 @@ import {
   BISHOP,
   KNIGHT,
   API_PROMOTION_URL,
-  ChessColor, API_CASTLE_URL,
+  ChessColor,
 } from "@/constants";
 
 import AsideHome from "@/components/home/aside.vue";
@@ -165,7 +165,6 @@ const capturedPieces = ref<ChessFigure[]>([]);
 const showPromotionModal = ref(false);
 const promotionRow = ref<number | null>(null);
 const promotionCol = ref<number | null>(null);
-const isCastling = ref(false);
 const promotionPieces = ref([
   {type: QUEEN, color: currentTurn.value},
   {type: ROOK, color: currentTurn.value},

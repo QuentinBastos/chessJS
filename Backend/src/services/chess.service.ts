@@ -124,91 +124,7 @@ class ChessService {
                 }
             }
         }
-
-        if (piece.type === KING) {
-            const castlingPositions = this.getCastlingPositions(piece);
-            availablePositions.push(...castlingPositions);
-            console.log('castlingPositions', castlingPositions);
-        }
-        console.log('availablePositions', availablePositions);
         return availablePositions;
-    }
-
-    private getCastlingPositions(king: ChessFigure): [number, number][] {
-        const castlingPositions: [number, number][] = [];
-
-        if (this.canCastle(king, 'king-side')) {
-            castlingPositions.push([king.position[0], king.position[1] + 2]);
-        }
-
-        if (this.canCastle(king, 'queen-side')) {
-            castlingPositions.push([king.position[0], king.position[1] - 2]);
-        }
-
-        return castlingPositions;
-    }
-
-    private canCastle(king: ChessFigure, side: 'king-side' | 'queen-side'): boolean {
-
-        //TODO change the way that i get the rook
-        const [kingRow, kingCol] = king.position;
-        const rookCol = side === 'king-side' ? 7 : 0;
-        const rook = this.board[kingRow][rookCol];
-
-        console.log('Checking castling for king at', king.position, 'and rook at', [kingRow, rookCol]);
-        console.log('Rook found:', rook);
-
-        if (!rook) {
-            console.log('No rook found at position', [kingRow, rookCol]);
-            return false;
-        }
-        if (rook.type !== ROOK) {
-            console.log('Piece at position is not a rook', rook);
-            return false;
-        }
-        if (rook.hasMoved) {
-            console.log('Rook has already moved', rook);
-            return false;
-        }
-        if (king.hasMoved) {
-            console.log('King has already moved', king);
-            return false;
-        }
-
-        const step = side === 'king-side' ? 1 : -1;
-        for (let col = kingCol + step; col !== rookCol; col += step) {
-            if (this.board[kingRow][col] !== null) {
-                return false;
-            }
-        }
-
-        const positionsToCheck: [number, number][] = [
-            [kingRow, kingCol],
-            [kingRow, kingCol + step],
-            [kingRow, kingCol + 2 * step]
-        ];
-
-        console.log('positionsToCheck', positionsToCheck);
-        for (const pos of positionsToCheck) {
-            console.log('pos', pos);
-            if (this.isSquareUnderAttack(pos, king.color)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private isSquareUnderAttack([row, col]: [number, number], color: ChessColor): boolean {
-        for (let r = 0; r < this.board.length; r++) {
-            for (let c = 0; c < this.board[r].length; c++) {
-                const piece = this.board[r][c];
-                if (piece && piece.color !== color && piece.isValidMove([row, col], this.board)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     public movePiece(pieceId: number, to: [number, number]): {
@@ -303,7 +219,7 @@ class ChessService {
         return [isInCheck, movePossible];
     }
 
-    public promotion(pieceId: number, type: number): { success: boolean, message?: string, board?: any } {
+    public promotion(pieceId: number, type: number): { success: boolean, message?: string, board?: (ChessFigure | null)[][] } {
         const piece = this.getPieceById(pieceId);
 
         if (!piece) {
