@@ -5,7 +5,8 @@ import {
     API_INIT_BOARD_URL,
     API_KING_CHECK_URL,
     API_MOVE_PIECE_URL,
-    API_POSSIBLES_MOVES_URL, API_PROMOTION_URL
+    API_POSSIBLES_MOVES_URL,
+    API_PROMOTION_URL,
 } from '../constants'
 
 import {getBoard, getPossibleMoves, getInitBoard, getStateGame, doMovePiece, doEndGame, doPromotion} from '../controllers/chess.controller';

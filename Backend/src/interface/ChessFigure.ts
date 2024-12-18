@@ -10,17 +10,20 @@ export abstract class ChessFigure {
     type: number;
     position: [number, number];
     color: ChessColor;
+    hasMoved: boolean = false;
 
-    protected constructor(id: number, type: number,  position: [number, number], color: ChessColor) {
+    protected constructor(id: number, type: number,  position: [number, number], color: ChessColor, hasMoved: boolean) {
         this.id = id;
         this.type = type;
         this.position = position;
         this.color = color;
+        this.hasMoved = hasMoved;
     }
 
     move(toPosition: [number, number], board: (ChessFigure|null)[][]): void {
         if (this.isValidMove(toPosition, board) && this.isKingSafeAfterMove(toPosition, board)) {
             this.position = toPosition;
+            this.hasMoved = true;
         } else {
             throw new Error("Invalid move");
         }

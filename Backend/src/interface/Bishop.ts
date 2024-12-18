@@ -1,8 +1,8 @@
 import { ChessColor, ChessFigure } from "./ChessFigure";
 
 export class Bishop extends ChessFigure {
-    constructor(id: number, type: number, position: [number, number], color: ChessColor) {
-        super(id, type, position, color);
+    constructor(id: number, type: number, position: [number, number], color: ChessColor, hasMoved: boolean) {
+        super(id, type, position, color,hasMoved);
     }
 
     isValidMove(to: [number, number], board: ChessFigure[][]): boolean {

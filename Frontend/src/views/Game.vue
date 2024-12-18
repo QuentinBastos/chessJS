@@ -11,7 +11,8 @@
               <span>(450)</span>
             </div>
             <div class="flex">
-              <img v-for="(piece, index) in capturedWhitePieces" :key="index" :src="getImageSrc(piece.type, piece.color)" :alt="`Captured White Piece ${index}`" width="24px"
+              <img v-for="(piece, index) in capturedWhitePieces" :key="index"
+                   :src="getImageSrc(piece.type, piece.color)" :alt="`Captured White Piece ${index}`" width="24px"
                    height="24px"/>
             </div>
           </div>
@@ -48,7 +49,8 @@
               <span>(450)</span>
             </div>
             <div class="flex">
-              <img v-for="(piece, index) in capturedBlackPieces" :key="index" :src="getImageSrc(piece.type, piece.color)" :alt="`Captured Black Piece ${index}`" width="24px"
+              <img v-for="(piece, index) in capturedBlackPieces" :key="index"
+                   :src="getImageSrc(piece.type, piece.color)" :alt="`Captured Black Piece ${index}`" width="24px"
                    height="24px"/>
             </div>
           </div>
@@ -74,7 +76,7 @@
         <p>Current Turn: {{ currentTurn }}</p>
         <div v-if="isGameStarted" @click="giveUp" class=" flex border w-full mt-4 rounded justify-center
           py-2 bg-neutral-800 text-white font-bold hover:opacity-75">
-          <p>Abandonner</p>
+          <p>Abandon</p>
         </div>
       </div>
     </div>
@@ -98,7 +100,8 @@
             </svg>
             <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400" v-html="textModal"></h3>
           </div>
-          <div v-if="isKingInCheckmate || hasGivenUp || isStaleMate" class="flex justify-center p-4 space-x-4 bg-gray-100 dark:bg-gray-800">
+          <div v-if="isKingInCheckmate || hasGivenUp || isStaleMate"
+               class="flex justify-center p-4 space-x-4 bg-gray-100 dark:bg-gray-800">
             <button @click="backToMenu"
                     class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600">Revenir au
               menu principale
@@ -111,7 +114,8 @@
       <div class="bg-white p-4 rounded shadow-lg">
         <h3 class="text-lg font-bold mb-4">Promote Pawn</h3>
         <div class="flex gap-4">
-          <img v-for="piece in promotionPieces" :key="piece.type" :src="getImageSrc(piece.type, piece.color)" :alt="piece.type"
+          <img v-for="piece in promotionPieces" :key="piece.type" :src="getImageSrc(piece.type, piece.color)"
+               :alt="String(piece.type)"
                @click="promotePawn(piece.type)" class="cursor-pointer" width="40px" height="40px"/>
         </div>
       </div>
@@ -122,7 +126,7 @@
 import {ref, onMounted, computed, onUnmounted} from "vue";
 import {useRouter} from "vue-router";
 import axios from "axios";
-import {ChessColor, ChessFigure} from "@/../../Backend/src/interface/ChessFigure";
+import {ChessFigure} from "@/models/ChessFigure";
 import {
   API_URL,
   API_BOARD_URL,
@@ -138,6 +142,7 @@ import {
   BISHOP,
   KNIGHT,
   API_PROMOTION_URL,
+  ChessColor, API_CASTLE_URL,
 } from "@/constants";
 
 import AsideHome from "@/components/home/aside.vue";
@@ -160,11 +165,12 @@ const capturedPieces = ref<ChessFigure[]>([]);
 const showPromotionModal = ref(false);
 const promotionRow = ref<number | null>(null);
 const promotionCol = ref<number | null>(null);
+const isCastling = ref(false);
 const promotionPieces = ref([
-  { type: QUEEN, color: currentTurn.value },
-  { type: ROOK, color: currentTurn.value },
-  { type: BISHOP, color: currentTurn.value },
-  { type: KNIGHT, color: currentTurn.value },
+  {type: QUEEN, color: currentTurn.value},
+  {type: ROOK, color: currentTurn.value},
+  {type: BISHOP, color: currentTurn.value},
+  {type: KNIGHT, color: currentTurn.value},
 ]);
 
 const loadBoard = async () => {
@@ -176,7 +182,7 @@ const loadBoard = async () => {
     currentTurn.value = response.data.currentTurn;
     isGameStarted.value = response.data.isGameStarted;
   } catch (error) {
-    errorMessage.value.push({title: "Error fetching board", message: error});
+    errorMessage.value.push({title: "Error fetching board", message: String(error)});
   }
 };
 
@@ -193,7 +199,7 @@ const initBoard = async () => {
     board.value = response.data.board;
     isGameStarted.value = response.data.isGameStarted;
   } catch (error) {
-    errorMessage.value.push({title: "Error fetching board", message: error});
+    errorMessage.value.push({title: "Error fetching board", message: String(error)});
   }
 };
 
@@ -204,7 +210,7 @@ const getPossibleMoves = async (pieceId: string) => {
     );
     return response.data;
   } catch (error: unknown) {
-    errorMessage.value.push({title: "Error move", message: error});
+    errorMessage.value.push({title: "Error move", message: String(error)});
     return [];
   }
 };
@@ -217,7 +223,7 @@ const movePiece = async (pieceId: number, toPosition: [number, number]) => {
     });
     return response.data;
   } catch (error) {
-    errorMessage.value.push({title: "Error fetching possible moves", message: error});
+    errorMessage.value.push({title: "Error fetching possible moves", message: String(error)});
     throw error;
   }
 };
@@ -229,7 +235,7 @@ const stateGame = async () => {
     );
     return response.data;
   } catch (error) {
-    errorMessage.value.push({title: "Error state game", message: error});
+    errorMessage.value.push({title: "Error state game", message: String(error)});
   }
 };
 
@@ -246,7 +252,7 @@ const onDragStart = async (event: DragEvent, row: number, col: number) => {
 
   const piece = board.value![row][col];
   if (piece && piece.color === currentTurn.value) {
-    draggedPiece.value = { row, col };
+    draggedPiece.value = {row, col};
     highlightedMoves.value = await getPossibleMoves(piece.id.toString());
   } else {
     event.preventDefault();
@@ -266,7 +272,7 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
     const toPosition: [number, number] = [row, col];
 
     if (pieceId === undefined) {
-      errorMessage.value.push({ title: "Piece", message: "Invalid piece position" });
+      errorMessage.value.push({ title: "Piece", message: "Mauvaise position" });
       return;
     }
 
@@ -301,7 +307,7 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
         }
       }
     } catch (error) {
-      errorMessage.value.push({ title: "Error moving piece", message: error });
+      errorMessage.value.push({ title: "Error moving piece", message: String(error) });
     }
     draggedPiece.value = null;
     highlightedMoves.value = [];
@@ -312,7 +318,7 @@ const promotePawn = async (type: number) => {
   if (promotionRow.value !== null && promotionCol.value !== null) {
     const pieceId = board.value![promotionRow.value][promotionCol.value]?.id;
     if (pieceId === undefined) {
-      errorMessage.value.push({ title: "Error", message: "Invalid piece position" });
+      errorMessage.value.push({title: "Error", message: "Invalid piece position"});
       return;
     }
 
@@ -345,7 +351,7 @@ const promotePawn = async (type: number) => {
         }
       }
     } catch (error) {
-      errorMessage.value.push({ title: "Error promoting pawn", message: error });
+      errorMessage.value.push({title: "Error promoting pawn", message: String(error)});
     }
   }
 };
@@ -390,8 +396,8 @@ async function giveUp() {
     hasGivenUp.value = true;
     showModal("Vous avez abandonné! <br> Game Over! <br> Winner: " + (currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White));
     await finish();
-  } catch (error: any) {
-    errorMessage.value.push({title: "Error giving up", message: error.message });
+  } catch (error) {
+    errorMessage.value.push({title: "Error giving up", message: String(error)});
   }
 }
 
@@ -405,10 +411,10 @@ async function finish() {
       name: 'test',
       review: JSON.stringify(review.value),
     }, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {Authorization: `Bearer ${token}`},
     });
   } catch (error) {
-    errorMessage.value.push({title: "Error finishing game", message: error.message || error});
+    errorMessage.value.push({title: "Error finishing game", message: String(error)});
   }
 }
 

@@ -17,3 +17,4 @@ export const API_KING_CHECK_URL = "/is-king-in-check/:color";
 export const API_GAMES_URL = "/games";
 export const API_END_GAME_URL = "/end-game";
 export const API_PROMOTION_URL = "/promotion";
+export const API_CASTLE_URL = "/can-castle";
