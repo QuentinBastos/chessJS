@@ -124,7 +124,7 @@
 <script setup>
 import navButton from "@/components/tools/button.vue";
 import {onMounted, ref} from "vue";
-import LeaderBoard from "@/views/LeaderBoard.vue";
+import LeaderBoard from "@/views/ChessLeaderBoard.vue";
 
 const storedUser = ref();
 

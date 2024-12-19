@@ -71,13 +71,13 @@
       <div class="flex flex-col w-1/3 bg-neutral-600 gap-4 rounded items-center px-4 py-6">
         <h2 class="text-white font-bold text-3xl">Jouer</h2>
         <div class="flex gap-2">
-          <div class="flex items-center rounded px-4" v-bind:style="!isPrivate ? {'background' : 'black'} :  {'background' : 'gray'}">
-            <input id="bordered-radio-1" type="radio" v-model="isPrivate" :value=false name="bordered-radio" class="w-4 h-4 hidden text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-            <label for="bordered-radio-1" class="w-full py-4 text-sm font-medium text-gray-900 dark:text-gray-300">Privé</label>
+          <div class="flex items-center rounded px-4 cursor-pointer" v-bind:style="!isPrivate ? {'background' : 'black'} :  {'background' : 'gray'}">
+            <input id="bordered-radio-1" type="radio" v-model="isPrivate" :value=false name="bordered-radio" class="w-4 h-4 hidden cursor-pointer text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+            <label for="bordered-radio-1" class="w-full py-4 text-sm cursor-pointer font-medium text-gray-900 dark:text-gray-300">Privé</label>
           </div>
-          <div class="flex items-center rounded  bg-neutral-800 px-4" v-bind:style="isPrivate ? {'background' : 'black'} :  {'background' : 'gray'}">
-            <input checked id="bordered-radio-2" type="radio" v-model="isPrivate" :value=true name="bordered-radio" class="w-4 h-4 hidden text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-            <label for="bordered-radio-2" class="w-full py-4 text-sm font-medium text-gray-900 dark:text-gray-300">Public</label>
+          <div class="flex items-center rounded cursor-pointer bg-neutral-800 px-4" v-bind:style="isPrivate ? {'background' : 'black'} :  {'background' : 'gray'}">
+            <input checked id="bordered-radio-2" type="radio" v-model="isPrivate" :value=true name="bordered-radio" class="w-4 h-4 hidden text-blue-600 cursor-pointer bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+            <label for="bordered-radio-2" class="w-full py-4 text-sm font-medium text-gray-900 dark:text-gray-300 cursor-pointer">Public</label>
           </div>
         </div>
         <label for="nameRoom" class="font-medium text-white">Nom partie </label>
@@ -137,7 +137,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import {ref, onMounted, computed, onUnmounted} from "vue";
+import {ref, onMounted, computed} from "vue";
 import {useRouter} from "vue-router";
 import axios from "axios";
 import {ChessFigure} from "@/models/ChessFigure";
@@ -301,6 +301,20 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
         currentTurn.value = currentTurn.value === ChessColor.White ? ChessColor.Black : ChessColor.White;
         capturedPieces.value = response.capturedPieces;
 
+        const audio = new Audio('/sounds/move-piece.mp3');
+        await audio.play();
+
+        const chessboard = document.querySelector('.chessboard');
+        const cells = document.querySelectorAll('.cell');
+        if (chessboard) {
+          chessboard.classList.toggle('rotate');
+        }
+        if (cells) {
+          cells.forEach((cell) => {
+            cell.classList.toggle('rotatePiece');
+          });
+        }
+
         if (response.promotion) {
           showPromotionModal.value = true;
           promotionRow.value = row;
@@ -326,6 +340,7 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
     } catch (error) {
       errorMessage.value.push({ title: "Error moving piece", message: String(error) });
     }
+
     draggedPiece.value = null;
     highlightedMoves.value = [];
   }
@@ -528,6 +543,14 @@ onMounted(loadBoard);
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.rotate {
+  transform: rotate(90deg);
+}
+
+.rotatePiece {
+  transform: rotate(270deg);
 }
 
 </style>

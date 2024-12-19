@@ -1,11 +1,11 @@
 import { createWebHistory, createRouter } from "vue-router";
-import Home from "@/views/Home.vue";
-import Login from "@/views/Login.vue";
-import Register from "@/views/Register.vue";
-import Game from "@/views/Game.vue";
-import History from "@/views/History.vue";
-import Review from "@/views/Review.vue";
-import LeaderBoard from "@/views/LeaderBoard.vue";
+import Home from "@/views/HomeGame.vue";
+import Login from "@/views/ChessLogin.vue";
+import Register from "@/views/ChessRegister.vue";
+import Game from "@/views/ChessGame.vue";
+import History from "@/views/ChessHistory.vue";
+import Review from "@/views/ChessReview.vue";
+import LeaderBoard from "@/views/ChessLeaderBoard.vue";
 import {API_URL} from "@/constants";
 import axios from "axios";
 
@@ -52,6 +52,7 @@ const router = createRouter({
   routes,
 });
 
+
 const checkServerStatus = async () => {
   try {
     const response = await axios.get(`${API_URL}/status`);
@@ -81,6 +82,5 @@ router.beforeEach(async (to, from, next) => {
     next();
   }
 });
-
 
 export default router;
