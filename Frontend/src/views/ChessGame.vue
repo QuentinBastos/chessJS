@@ -6,12 +6,20 @@
         <div class="flex text-white font-bold gap-4 my-2 h-[10vh]">
           <img src="/images/player/car.png" width="48" height="48" alt="iconProfile"/>
           <div class="flex flex-col gap-1">
-            <div>
-              <span>Modzi</span>
+            <div v-if="currentTurn === ChessColor.White">
+              <span>Invité</span>
+            </div>
+            <div v-if="currentTurn === ChessColor.Black">
+              <span>{{ username }}</span>
               <span>(450)</span>
             </div>
-            <div class="flex">
+            <div class="flex" v-if="currentTurn === ChessColor.Black">
               <img v-for="(piece, index) in capturedWhitePieces" :key="index"
+                   :src="getImageSrc(piece.type, piece.color)" :alt="`Captured Black Piece ${index}`" width="24px"
+                   height="24px"/>
+            </div>
+            <div class="flex" v-if="currentTurn === ChessColor.White">
+              <img v-for="(piece, index) in capturedBlackPieces" :key="index"
                    :src="getImageSrc(piece.type, piece.color)" :alt="`Captured White Piece ${index}`" width="24px"
                    height="24px"/>
             </div>
@@ -44,13 +52,21 @@
         <div class="text-white font-bold flex gap-4 my-2 h-[10vh]">
           <img src="/images/player/car.png" width="48" height="48" alt="iconProfile"/>
           <div class="flex flex-col gap-1">
-            <div>
-              <span>Modzi</span>
+            <div v-if="currentTurn === ChessColor.White">
+              <span>{{ username }}</span>
               <span>(450)</span>
             </div>
-            <div class="flex">
+            <div v-if="currentTurn === ChessColor.Black">
+              <span>Invité</span>
+            </div>
+            <div class="flex" v-if="currentTurn === ChessColor.Black">
               <img v-for="(piece, index) in capturedBlackPieces" :key="index"
                    :src="getImageSrc(piece.type, piece.color)" :alt="`Captured Black Piece ${index}`" width="24px"
+                   height="24px"/>
+            </div>
+            <div class="flex" v-if="currentTurn === ChessColor.White">
+              <img v-for="(piece, index) in capturedWhitePieces" :key="index"
+                   :src="getImageSrc(piece.type, piece.color)" :alt="`Captured White Piece ${index}`" width="24px"
                    height="24px"/>
             </div>
           </div>
@@ -182,6 +198,7 @@ const nameRoom = ref('');
 const showPromotionModal = ref(false);
 const promotionRow = ref<number | null>(null);
 const promotionCol = ref<number | null>(null);
+const username = JSON.parse(<string>localStorage.getItem("user")).username;
 const promotionPieces = ref([
   {type: QUEEN, color: currentTurn.value},
   {type: ROOK, color: currentTurn.value},
@@ -312,6 +329,12 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
         if (cells) {
           cells.forEach((cell) => {
             cell.classList.toggle('rotatePiece');
+            cell.classList.remove('fade-in');
+            cell.classList.add('fade-out');
+            setTimeout(() => {
+              cell.classList.remove('fade-out');
+              cell.classList.add('fade-in');
+            }, 500);
           });
         }
 
@@ -512,6 +535,7 @@ onMounted(loadBoard);
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
 
   &:hover {
     opacity: 0.75;
@@ -551,6 +575,14 @@ onMounted(loadBoard);
 
 .rotatePiece {
   transform: rotate(270deg);
+}
+
+.fade-in {
+  opacity: 1 !important;
+}
+
+.fade-out {
+  opacity: 0 !important;
 }
 
 </style>
