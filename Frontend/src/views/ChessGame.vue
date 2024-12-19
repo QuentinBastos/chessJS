@@ -137,7 +137,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import {ref, onMounted, computed, onUnmounted} from "vue";
+import {ref, onMounted, computed} from "vue";
 import {useRouter} from "vue-router";
 import axios from "axios";
 import {ChessFigure} from "@/models/ChessFigure";
@@ -304,6 +304,17 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
         const audio = new Audio('/sounds/move-piece.mp3');
         await audio.play();
 
+        const chessboard = document.querySelector('.chessboard');
+        const pieces = document.querySelectorAll('.piece');
+        if (chessboard) {
+          chessboard.classList.toggle('rotate');
+        }
+        if (pieces) {
+          pieces.forEach((piece) => {
+            piece.classList.toggle('rotatePiece');
+          });
+        }
+
         if (response.promotion) {
           showPromotionModal.value = true;
           promotionRow.value = row;
@@ -329,6 +340,7 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
     } catch (error) {
       errorMessage.value.push({ title: "Error moving piece", message: String(error) });
     }
+
     draggedPiece.value = null;
     highlightedMoves.value = [];
   }
@@ -531,6 +543,14 @@ onMounted(loadBoard);
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.rotate {
+  transform: rotate(90deg);
+}
+
+.rotatePiece {
+  transform: rotate(180deg);
 }
 
 </style>
