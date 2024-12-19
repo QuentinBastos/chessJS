@@ -15,4 +15,5 @@ export const API_MOVE_PIECE_URL = "/move-pieces";
 export const API_KING_CHECK_URL = "/is-king-in-check/:color";
 export const API_END_GAME_URL = "/end-game";
 export const API_PROMOTION_URL = "/promotion";
+export const API_STATUS = "/status";
 

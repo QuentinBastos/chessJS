@@ -53,7 +53,7 @@ const register = async () => {
       },
     });
 
-    await router.push({path: '/login'})
+    await router.push({path: '/'})
   } catch (err) {
     console.error(err);
   }
