@@ -305,13 +305,13 @@ const onDrop = async (event: DragEvent, row: number, col: number) => {
         await audio.play();
 
         const chessboard = document.querySelector('.chessboard');
-        const pieces = document.querySelectorAll('.piece');
+        const cells = document.querySelectorAll('.cell');
         if (chessboard) {
           chessboard.classList.toggle('rotate');
         }
-        if (pieces) {
-          pieces.forEach((piece) => {
-            piece.classList.toggle('rotatePiece');
+        if (cells) {
+          cells.forEach((cell) => {
+            cell.classList.toggle('rotatePiece');
           });
         }
 
@@ -550,7 +550,7 @@ onMounted(loadBoard);
 }
 
 .rotatePiece {
-  transform: rotate(180deg);
+  transform: rotate(270deg);
 }
 
 </style>
