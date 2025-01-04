@@ -451,8 +451,8 @@ async function giveUp() {
 async function finish() {
   try {
     const token = localStorage.getItem("jwt_token");
-    const response = await axios.post(`${API_URL}${API_ROOT_URL}${API_END_GAME_URL}`);
-    isGameStarted.value = response.data.isGameStarted;
+    const response = await endGame();
+    isGameStarted.value = response.isGameStarted;
 
     isGameStarted.value = response.isGameStarted;
     const handleCreateGame = async () => {
