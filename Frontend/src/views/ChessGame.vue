@@ -98,7 +98,7 @@
         </div>
         <label for="nameRoom" class="font-medium text-white">Nom partie </label>
         <input id="nameRoom" type="text" v-model="nameRoom" class="w-2/3 shadow py-1 pl-1 rounded">
-        <div v-if="!isGameStarted" @click="initBoard" class=" flex border w-full mt-4 rounded justify-center
+        <div v-if="!isGameStarted" @click="createBoard" class=" flex border w-full mt-4 rounded justify-center
             py-2 bg-white text-black font-bold hover:opacity-75">
             <p>Commencer</p>
           </div>
@@ -155,28 +155,27 @@
 <script setup lang="ts">
 import {ref, onMounted, computed} from "vue";
 import {useRouter} from "vue-router";
-import axios from "axios";
 import {ChessFigure} from "@/models/ChessFigure";
 import {
-  API_URL,
-  API_BOARD_URL,
-  API_POSSIBLES_MOVES_URL,
-  API_MOVE_PIECE_URL,
-  API_KING_CHECK_URL,
-  API_ROOT_URL,
-  API_INIT_BOARD_URL,
-  API_GAMES_URL,
-  API_END_GAME_URL,
-  API_HISTORIES_URL,
   QUEEN,
   ROOK,
   BISHOP,
   KNIGHT,
-  API_PROMOTION_URL,
   ChessColor,
 } from "@/constants";
 
 import AsideHome from "@/components/home/aside.vue";
+import { useGameService } from "@/composable/game/useGameService";
+import { useHistoryService } from "@/composable/history/useHistoryService";
+import {
+  getBoard,
+  initBoard,
+  getPossibleMovesPiece,
+  moveOnePiece,
+  isKingInCheck,
+  promotePiece,
+  endGame,
+} from '@/composable/gamePlay';
 
 const router = useRouter();
 const board = ref<(ChessFigure | null)[][] | null>(null);
@@ -198,6 +197,8 @@ const nameRoom = ref('');
 const showPromotionModal = ref(false);
 const promotionRow = ref<number | null>(null);
 const promotionCol = ref<number | null>(null);
+const { createGame } = useGameService();
+const { createHistory } = useHistoryService();
 const username = JSON.parse(<string>localStorage.getItem("user")).username;
 const promotionPieces = ref([
   {type: QUEEN, color: currentTurn.value},
@@ -209,18 +210,19 @@ const promotionPieces = ref([
 
 const loadBoard = async () => {
   try {
-    const response = await axios.get(API_URL + API_ROOT_URL + API_BOARD_URL);
-    capturedPieces.value = response.data.capturedPieces;
-    review.value = response.data.review;
-    board.value = response.data.board;
-    currentTurn.value = response.data.currentTurn;
-    isGameStarted.value = response.data.isGameStarted;
+    const response = await getBoard();
+    console.log(response);
+    capturedPieces.value = response.capturedPieces;
+    review.value = response.review;
+    board.value = response.board;
+    currentTurn.value = response.currentTurn;
+    isGameStarted.value = response.isGameStarted;
   } catch (error) {
     errorMessage.value.push({title: "Error fetching board", message: String(error)});
   }
 };
 
-const initBoard = async () => {
+const createBoard = async () => {
   try {
     review.value = [''];
     highlightedMoves.value = [];
@@ -229,9 +231,9 @@ const initBoard = async () => {
     isStaleMate.value = false;
     isCheck.value = false;
     capturedPieces.value = [];
-    const response = await axios.get(API_URL + API_ROOT_URL + API_INIT_BOARD_URL);
-    board.value = response.data.board;
-    isGameStarted.value = response.data.isGameStarted;
+    const response = await initBoard();
+    board.value = response.board;
+    isGameStarted.value = response.isGameStarted;
   } catch (error) {
     errorMessage.value.push({title: "Error fetching board", message: String(error)});
   }
@@ -239,10 +241,8 @@ const initBoard = async () => {
 
 const getPossibleMoves = async (pieceId: string) => {
   try {
-    const response = await axios.get(
-      `${API_URL}${API_ROOT_URL}${API_POSSIBLES_MOVES_URL.replace(":id", pieceId)}`
-    );
-    return response.data;
+    const response = await getPossibleMovesPiece(pieceId)
+    return response;
   } catch (error: unknown) {
     errorMessage.value.push({title: "Error move", message: String(error)});
     return [];
@@ -251,11 +251,8 @@ const getPossibleMoves = async (pieceId: string) => {
 
 const movePiece = async (pieceId: number, toPosition: [number, number]) => {
   try {
-    const response = await axios.post(API_URL + API_ROOT_URL + API_MOVE_PIECE_URL, {
-      pieceId,
-      toPosition,
-    });
-    return response.data;
+    const response = await moveOnePiece(pieceId, toPosition);
+    return response;
   } catch (error) {
     errorMessage.value.push({title: "Error fetching possible moves", message: String(error)});
     throw error;
@@ -264,10 +261,8 @@ const movePiece = async (pieceId: number, toPosition: [number, number]) => {
 
 const stateGame = async () => {
   try {
-    const response = await axios.get(
-      `${API_URL}${API_ROOT_URL}${API_KING_CHECK_URL.replace(":color", currentTurn.value)}`
-    );
-    return response.data;
+    const response = await isKingInCheck(currentTurn.value)
+    return response;
   } catch (error) {
     errorMessage.value.push({title: "Error state game", message: String(error)});
   }
@@ -378,13 +373,10 @@ const promotePawn = async (type: number) => {
     }
 
     try {
-      const response = await axios.post(`${API_URL}${API_ROOT_URL}${API_PROMOTION_URL}`, {
-        pieceId,
-        pieceType: type,
-      });
+      const response = await promotePiece(pieceId, type)
 
-      if (response && response.data.success) {
-        board.value = response.data.board;
+      if (response && response.success) {
+        board.value = response.board;
         showPromotionModal.value = false;
         promotionRow.value = null;
         promotionCol.value = null;
@@ -462,31 +454,25 @@ async function finish() {
     const response = await axios.post(`${API_URL}${API_ROOT_URL}${API_END_GAME_URL}`);
     isGameStarted.value = response.data.isGameStarted;
 
-    const gameResponse = await axios.post(
-      `${API_URL}${API_GAMES_URL}`,
-      {
-        name: nameRoom.value || 'echec',
-        review: JSON.stringify(review.value),
-        share: Number(isPrivate.value),
-      },
-      {
-        headers: { Authorization: `Bearer ${token}` },
+    isGameStarted.value = response.isGameStarted;
+    const handleCreateGame = async () => {
+      try {
+        const response = await createGame( token , {
+          name: nameRoom.value || "check",
+          review: JSON.stringify(review.value),
+          share: Number(isPrivate.value),
+        });
+        return response.data;
+      } catch (err) {
+        console.error("Erreur lors de la création du jeu :", err);
+        throw err;
       }
-    );
+    };
 
-    const idGame = gameResponse.data.id;
-
+    const gameData = await handleCreateGame();
+    console.log(gameData.id);
     const userId = JSON.parse(<string>localStorage.getItem("user")).id;
-    await axios.post(
-      `${API_URL}${API_HISTORIES_URL}`,
-      {
-        idUser: userId,
-        idGame: idGame,
-      },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    await createHistory(token, { idUser: userId, idGame :gameData.id });
   } catch (error) {
     errorMessage.value.push({title: "Error finishing game", message: String(error)});
   }
@@ -494,7 +480,7 @@ async function finish() {
 
 
 async function backToMenu() {
-  await initBoard();
+  await createBoard();
   await router.push({path: '/'});
 }
 
