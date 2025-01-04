@@ -10,7 +10,7 @@ export function useGameService() {
     error: null,
   });
 
-  const fetchAllGames = async (token) => {
+  const fetchAllGames = async (token : string) => {
     state.loading = true;
     try {
       const response = await gameApi.getAllGames(token);
@@ -23,11 +23,12 @@ export function useGameService() {
     }
   };
 
-  const fetchGameById = async (gameId, token) => {
+  const fetchGameById = async (gameId : number, token : string) => {
     state.loading = true;
     try {
       const response = await gameApi.getGameById(gameId, token);
       state.game = response.data;
+      return response.data;
     } catch (err) {
       state.error = err;
       console.error("Error fetching game by ID:", err);
@@ -53,11 +54,11 @@ export function useGameService() {
   };
 
 
-  const updateGame = async (token, gameId, data) => {
+  const updateGame = async (token : string, gameId : number, data: { name: string; review: string; share: number }) => {
     state.loading = true;
     try {
       await gameApi.updateGame(token, gameId, data);
-      await fetchGameById(gameId, token); // Refresh the specific game
+      await fetchGameById(gameId, token);
     } catch (err) {
       state.error = err;
       console.error("Error updating game:", err);
@@ -66,11 +67,11 @@ export function useGameService() {
     }
   };
 
-  const deleteGame = async (token, gameId) => {
+  const deleteGame = async (token : string, gameId : number) => {
     state.loading = true;
     try {
       await gameApi.deleteGame(token, gameId);
-      await fetchAllGames(token); // Refresh the games list
+      await fetchAllGames(token);
     } catch (err) {
       state.error = err;
       console.error("Error deleting game:", err);

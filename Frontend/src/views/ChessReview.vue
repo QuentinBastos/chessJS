@@ -49,13 +49,14 @@
 </template>
 
 <script setup lang="ts">
-import axios from "axios";
 import {ChessColor, ChessFigure} from "@/../../Backend/src/interface/ChessFigure";
-import { API_GAMES_URL, API_INIT_BOARD_URL, API_ROOT_URL, API_URL} from "@/constants";
+import { useGameService } from "@/composable/game/useGameService";
+import { initBoard } from '@/composable/gamePlay';
 import {onMounted, ref} from "vue";
 import {useRoute} from "vue-router"
 import AsideHome from "@/components/home/aside.vue";
 
+const { fetchGameById } = useGameService();
 const currentTurn = ref<ChessColor>(ChessColor.White);
 const review = ref<string[]>([])
 const board = ref<(ChessFigure | null)[][] | null>(null);
@@ -65,17 +66,15 @@ const route = useRoute();
 onMounted(async () => {
   const token = localStorage.getItem("jwt_token");
   const gameId = route.params.id;
-  const response = await axios.get(`${API_URL}${API_GAMES_URL}/${gameId}`, {
-    headers: {Authorization: `Bearer ${token}`}
-  });
-  review.value = JSON.parse(response.data.review);
+  const response = await fetchGameById(gameId, token);
+  review.value = JSON.parse(response.review);
   await loadBoard();
 });
 
 const loadBoard = async () => {
   try {
-    const response = await axios.get(API_URL + API_ROOT_URL + API_INIT_BOARD_URL);
-    board.value = response.data.board;
+    const response = await initBoard();
+    board.value = response.board;
   } catch (error) {
     console.error("Error fetching board:", error);
   }

@@ -26,13 +26,13 @@
 </template>
 
 <script setup lang="ts">
-import axios from "axios";
 import {ref} from "vue";
 import navButton from "@/components/tools/button.vue";
+import { useUserService } from "@/composable/user/useUserService";
 
 import { useRouter } from "vue-router";
-import {API_URL} from "@/constants";
 
+const { createUser } = useUserService();
 const router = useRouter()
 const username = ref("");
 const password = ref("");
@@ -42,16 +42,12 @@ const rank = ref(0);
 const register = async () => {
   try {
 
-    await axios.post(`${API_URL}/users`, {
+    await createUser({
       username: username.value,
-      email: email.value,
-      password: password.value,
+      email: email.value ,
+      password: password.value ,
       rank: rank.value
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    } )
 
     await router.push({path: '/'})
   } catch (err) {

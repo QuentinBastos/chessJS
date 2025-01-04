@@ -40,10 +40,13 @@
 <script setup lang="ts">
 
 import AsideHome from "@/components/home/aside.vue";
-import {ref, onMounted} from "vue";
-import axios from "axios";
+import {onMounted, ref} from "vue";
+import {useGameService} from "@/composable/game/useGameService";
+import {useHistoryService} from "@/composable/history/useHistoryService";
 import {useRoute} from "vue-router"
-import {API_GAMES_URL, API_HISTORIES_URL, API_URL} from "@/constants";
+
+const { fetchGameById } = useGameService();
+const { fetchHistoriesByUserId } = useHistoryService();
 
 const histories = ref([]);
 const gameList = ref([]);
@@ -51,34 +54,24 @@ const route = useRoute();
 
 onMounted(async () => {
   try {
-    const token = localStorage.getItem("jwt_token");
-
-    const response = await axios.get(
-      `${API_URL}${API_HISTORIES_URL}/user/${route.params.id}`,
-      {
-        headers: {Authorization: `Bearer ${token}`},
-      }
-    );
-
-    histories.value = response.data;
+    const token = localStorage.getItem('jwt_token');
+    if (!token) {
+      throw new Error('Token JWT non trouvé');
+    }
+    console.log(token);
+    histories.value = await fetchHistoriesByUserId(route.params.id , token);
     for (let i = 0; i < histories.value.length; i++) {
-      const id = histories.value[i].idGame
-      const gameResponse = await axios.get(`${API_URL}${API_GAMES_URL}/${id}`,
-        {
-          headers: {Authorization: `Bearer ${token}`},
-        }
-      );
-
+      const gameResponse = await fetchGameById(histories.value[i].idGame, token);
       if (route.params.id == JSON.parse(localStorage.getItem("user")).id ) {
-        gameList.value.push(gameResponse.data);
+        gameList.value.push(gameResponse);
       } else {
-        if (gameResponse.data && gameResponse.data.share === 1) {
-          gameList.value.push(gameResponse.data);
+        if (gameResponse && gameResponse.share === 1) {
+          gameList.value.push(gameResponse);
         }
       }
     }
   } catch (err) {
-    console.error("Error fetching histories:", err);
+    console.error('Erreur lors de la récupération des données :', err);
   }
 });
 

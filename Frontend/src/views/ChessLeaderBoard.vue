@@ -39,23 +39,18 @@
 
 import AsideHome from "@/components/home/aside.vue";
 import {ref, onMounted} from "vue";
-import axios from "axios";
-import {API_URL, API_USERS_URL} from "@/constants";
+import { useUserService } from "@/composable/user/useUserService";
 
+const { fetchAllUsers } = useUserService();
 const userList = ref({});
 
 onMounted(async () => {
   try {
     const token = localStorage.getItem("jwt_token");
 
-    const response = await axios.get(
-      `${API_URL}${API_USERS_URL}`,
-      {
-        headers: {Authorization: `Bearer ${token}`},
-      }
-    );
+    const response = await fetchAllUsers(token);
 
-    userList.value = response.data.sort((a, b) => a.rank - b.rank).reverse();
+    userList.value = response.sort((a, b) => a.rank - b.rank).reverse();
   } catch (err) {
       console.error("Error fetching histories:", err);
   }
