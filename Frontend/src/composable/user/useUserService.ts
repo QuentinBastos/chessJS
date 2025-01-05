@@ -28,6 +28,7 @@ export function useUserService() {
     try {
       const response = await userApi.getUserById(userId, token);
       state.user = response.data;
+      return response.data
     } catch (err) {
       state.error = err;
       console.error('Error fetching user by ID:', err);

@@ -51,9 +51,11 @@
       </router-link>
       <ul class="flex flex-col text-white font-bold text-lg">
         <li
-          class="flex items-center gap-4 px-3 py-2 hover:bg-neutral-600 cursor-pointer lg:justify-start justify-center">
-          <img src="/images/icons/strategy.png" alt="LocalChess" class="w-[36px]">
-          <p class="hidden lg:flex">Jouer</p>
+          class="flex items-center hover:bg-neutral-600 cursor-pointer lg:justify-start justify-center">
+          <router-link class="flex items-center gap-4 px-3 py-2" to="/game">
+            <img src="/images/icons/strategy.png" alt="LocalChess" class="w-[36px]">
+            <p class="hidden lg:flex">Jouer</p>
+          </router-link>
         </li>
         <li
           class="flex items-center gap-4 px-3 py-2 hover:bg-neutral-600 cursor-pointer lg:justify-start justify-center">
@@ -72,9 +74,11 @@
           </router-link>
         </li>
         <li
-          class="flex items-center gap-4 px-3 py-2 hover:bg-neutral-600 cursor-pointer lg:justify-start justify-center">
-          <img src="/images/icons/newspaper.png" alt="LocalChess" class="w-[36px]">
-          <p class="hidden lg:flex">Info</p>
+          class="flex items-center hover:bg-neutral-600 cursor-pointer lg:justify-start justify-center">
+          <router-link class="flex items-center gap-4 px-3 py-2" to="/profil">
+            <img src="/images/icons/newspaper.png" alt="Profil" class="w-[36px]">
+            <p class="hidden lg:flex">Profil</p>
+          </router-link>
         </li>
         <li
           class="flex hover:bg-neutral-600 cursor-pointer lg:justify-start justify-center">

@@ -211,7 +211,6 @@ const promotionPieces = ref([
 const loadBoard = async () => {
   try {
     const response = await getBoard();
-    console.log(response);
     capturedPieces.value = response.capturedPieces;
     review.value = response.review;
     board.value = response.board;
@@ -470,7 +469,6 @@ async function finish() {
     };
 
     const gameData = await handleCreateGame();
-    console.log(gameData.id);
     const userId = JSON.parse(<string>localStorage.getItem("user")).id;
     await createHistory(token, { idUser: userId, idGame :gameData.id });
   } catch (error) {

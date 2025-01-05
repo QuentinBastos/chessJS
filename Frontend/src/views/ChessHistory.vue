@@ -4,8 +4,9 @@
     <div class="w-full bg-neutral-800 text-white  font-bold py-10 px-16 overflow-y-auto">
       <div class="flex gap-2 items-center mb-6">
         <img src="/images/icons/binoculars.png" class="w-[54px]">
-        <h1 class="text-3xl">Historiques ({{ gameList.length }})</h1>
+        <h1 class="text-3xl ">Historiques ({{ gameList.length }})</h1>
       </div>
+      <h1 class="text-xl my-2">Nombres de coup total: {{ totalMoves }}</h1>
       <div class="flex-col bg-neutral-900 py-4 px-2 rounded">
         <table class="w-full table-auto">
           <thead>
@@ -40,7 +41,7 @@
 <script setup lang="ts">
 
 import AsideHome from "@/components/home/aside.vue";
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {useGameService} from "@/composable/game/useGameService";
 import {useHistoryService} from "@/composable/history/useHistoryService";
 import {useRoute} from "vue-router"
@@ -50,6 +51,12 @@ const { fetchHistoriesByUserId } = useHistoryService();
 
 const histories = ref([]);
 const gameList = ref([]);
+const totalMoves = computed(() => {
+  return gameList.value.reduce((sum, game) => {
+    const moves = JSON.parse(game.review);
+    return sum + moves.length;
+  }, 0);
+});
 const route = useRoute();
 
 onMounted(async () => {
@@ -58,7 +65,7 @@ onMounted(async () => {
     if (!token) {
       throw new Error('Token JWT non trouvé');
     }
-    console.log(token);
+
     histories.value = await fetchHistoriesByUserId(route.params.id , token);
     for (let i = 0; i < histories.value.length; i++) {
       const gameResponse = await fetchGameById(histories.value[i].idGame, token);
@@ -70,6 +77,7 @@ onMounted(async () => {
         }
       }
     }
+
   } catch (err) {
     console.error('Erreur lors de la récupération des données :', err);
   }

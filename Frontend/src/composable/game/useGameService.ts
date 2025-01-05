@@ -38,7 +38,6 @@ export function useGameService() {
   };
 
   const createGame = async (token: string, data: { name: string; review: string; share: number }) => {
-    console.log("Payload envoyé :", data);
     state.loading = true;
     try {
       const response = await gameApi.createGame(token, data);

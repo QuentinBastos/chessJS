@@ -1,47 +1,76 @@
-## Project Setup
+# Installation
+
+### Cloner le dépôt :
 
 ```sh
+git clone https://github.com/QuentinBastos/chessJS.git
+```
+
+# Installer les dépendances :
+
+### Backend :
+
+```sh
+cd backend
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### Frontend :
 
 ```sh
-npm run start
-```
-or to enable   watcher of the app.ts file
-```sh
-npx nodemon app.ts
-```
-
-### Run test
-
-```sh
-npm run test
-```
--  [x] The test is written in jest, but the test not handle all cases
-
-## Project Setup
-
-```sh
+cd frontend
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+# Démarrer les serveurs :
+
+### Backend :
 
 ```sh
+cd ../backend
+npm start
+```
+
+### Frontend :
+
+```sh
+cd ../frontend
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
 
-```sh
-npm run build
-```
+### Routes de l'Application
 
-### Functionality
+L'application comporte plusieurs routes, chacune ayant une fonction spécifique :
 
-- [x] There are all functionalities in the project of a basic chess game
-- [x] There is sound when a piece is moved
-- [x] The only missing functionality is the castling 
+***
+- Home (/) :
+  Page d'accueil par défaut où l'utilisateur arrive. Aucune action n'est permise sans être connecté ; toute tentative redirige vers la page de connexion.
+***
+- Login (/login) et Register (/register) :
+  Permettent la connexion ou la création de compte. Des utilisateurs sont déjà créés par défaut :
 
+  1. user1 : mot de passe user1, elo 400
+  2. user2 : mot de passe user2, elo 600
+  3. user3 : mot de passe user3, elo 800
+***
+- Profil (/profil) :
+  Permet de changer le username ou l'email de notre utilisateur.
+***
+- Game (/game) :
+  Implémente les règles des échecs (premier déplacement des pions de 2 cases, promotion, etc., sauf roque et prise en passant). Les pièces se déplacent par un système de glisser-déposer. Sur le volet droit, l'utilisateur peut choisir si la partie est publique ou privée, nommer la partie, et utiliser des boutons pour lancer ou abandonner la partie. En dessous, le tour du joueur est affiché.
+***
+- Review (/review/:id) :
+  Permet de revoir une partie avec des flèches pour avancer ou reculer dans les coups, et à droite, la liste des coups effectués.
+***
+- History (/history/:id) :
+  Affiche la liste des parties jouées par l'utilisateur connecté, avec un bouton pour accéder à la revue de chaque partie.
+***
+- LeaderBoard (/leaderboard) :
+  Classement de tous les joueurs en base, triés par leur elo.
+***
+
+## Bonus
+  - Sound Design : un petit song à été rajouté au déplacement d'un pion.
+  - Responsive Design : La page d'accueil est entièrement responsive.
+  - Style : L'ensemble de l'application est stylisé avec le framework CSS [Tailwind CSS](https://tailwindcss.com).

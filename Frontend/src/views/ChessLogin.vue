@@ -1,4 +1,4 @@
-<template>
+  <template>
   <div class="w-screen h-screen flex justify-center bg-neutral-800">
     <div class="flex flex-col gap-2 w-1/3 mb-16 items-center justify-center text-white">
       <div class="flex items-center py-2 px-3">
@@ -23,39 +23,27 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import axios from "axios";
-import {ref} from "vue";
-import navButton from "@/components/tools/button.vue";
-import { useRouter } from 'vue-router'
-import { API_URL } from "@/constants";
+  <script setup lang="ts">
 
-const router = useRouter()
-const username = ref("");
-const password = ref("");
+  import navButton from "@/components/tools/button.vue";
+  import { ref } from 'vue';
+  import { useRouter } from 'vue-router';
+  import { useAuthService} from "@/composable/auth/useAuthService";
 
-const login = async () => {
-  try {
+  const router = useRouter();
+  const username = ref('');
+  const password = ref('');
+  const { authenticate } = useAuthService()
 
-    const response = await axios.post(`${API_URL}/auth`, {
-      grant_type: "password",
-      username: username.value,
-      password: password.value,
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-
-    const {token} = response.data;
-    localStorage.setItem("jwt_token", token[0]);
-    const user = {id: token[1], username: token[2], email: token[3]};
-    localStorage.setItem("user", JSON.stringify(user));
-    await router.push({path: '/'})
-
-  } catch (err) {
-    console.error(err);
-  }
-};
-</script>
+  const login = async () => {
+    try {
+      const { token } = await authenticate(username.value, password.value);
+      localStorage.setItem('jwt_token', token[0]);
+      const user = { id: token[1], username: token[2], email: token[3] };
+      localStorage.setItem('user', JSON.stringify(user));
+      await router.push({ path: '/' });
+    } catch (err) {
+      console.error('Login failed:', err);
+    }
+  };
+  </script>

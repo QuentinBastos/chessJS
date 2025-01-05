@@ -16,7 +16,6 @@ export const gameApi = {
   },
 
   async createGame(token : string,  data: { name: string; review: string; share: number } ) {
-    console.log(data);
     return await axios.post(`${API_URL}${API_GAMES_URL}/`, data, {
       headers: { Authorization: `Bearer ${token}` },
     });

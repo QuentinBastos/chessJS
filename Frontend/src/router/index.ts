@@ -8,6 +8,7 @@ import Review from "@/views/ChessReview.vue";
 import LeaderBoard from "@/views/ChessLeaderBoard.vue";
 import {API_URL} from "@/constants";
 import axios from "axios";
+import Profil from "@/views/Profil.vue";
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: "/register",
     name: "Register",
     component: Register,
+  },
+  {
+    path: "/profil",
+    name: "Profil",
+    component: Profil,
   },
   {
     path: "/game",
