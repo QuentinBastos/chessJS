@@ -9,8 +9,7 @@
     "swagger": "tsoa spec && tsoa routes",
     "predev": "npm run swagger",
     "stop": "pkill --signal SIGINT myApp",
-    "typecheck": "tsc --noEmit",
-    "build": "tsc"
+    "typecheck": "tsc --noEmit"
   },
   "nodemonConfig": {
     "watch": [
