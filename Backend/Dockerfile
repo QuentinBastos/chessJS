@@ -14,7 +14,7 @@ RUN npm ci
 COPY . .
 
 # Build the application
-RUN npm run start
+RUN npm run build
 
 # Use a smaller base image for the final build
 FROM node:18-alpine
