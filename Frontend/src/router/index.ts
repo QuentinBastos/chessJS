@@ -8,7 +8,7 @@ import Review from "@/views/ChessReview.vue";
 import LeaderBoard from "@/views/ChessLeaderBoard.vue";
 import {API_URL} from "@/constants";
 import axios from "axios";
-import Profil from "@/views/Profil.vue";
+import Profil from "@/views/ChessAccount.vue";
 
 const routes = [
   {

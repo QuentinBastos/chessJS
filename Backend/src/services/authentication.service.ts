@@ -24,7 +24,7 @@ export class AuthenticationService {
             return ([jwtToken, user.id, user.username, user.email]);
         } else {
             const error = new Error("Wrong password");
-            (error as any).status = 403;
+            (error as CustomError).status = 403;
             throw error;
         }
     }

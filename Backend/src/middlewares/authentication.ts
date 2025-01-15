@@ -1,11 +1,16 @@
 import * as express from "express";
 import * as jwt from "jsonwebtoken";
 
+interface DecodedToken {
+    scopes?: { [resource: string]: string[] };
+    [key: string]: unknown;
+}
+
 export function expressAuthentication(
     request: express.Request,
     securityName: string,
     scopes?: string[]
-): Promise<any> {
+): Promise<DecodedToken> {
     if (securityName === "jwt") {
         const token =
             request.body.token ||
@@ -19,21 +24,23 @@ export function expressAuthentication(
             jwt.verify(
                 token,
                 "your_jwt_secret_key",
-                function (err: any, decoded: any) {
+                {},
+                (err: jwt.VerifyErrors | null, decoded: string | jwt.JwtPayload | undefined) => {
                     if (err) {
                         reject(err);
                     } else {
+                        const decodedToken = decoded as DecodedToken;
                         if (scopes !== undefined) {
-                            const userScopes = decoded.scopes;
+                            const userScopes = decodedToken.scopes;
 
                             for (const scope of scopes) {
                                 const [resource, action] = scope.split(":");
-                                if (!userScopes[resource]?.includes(action)) {
+                                if (!userScopes?.[resource]?.includes(action)) {
                                     reject(new Error(`JWT does not contain required permission for ${scope}`));
                                 }
                             }
                         }
-                        resolve(decoded);
+                        resolve(decodedToken);
                     }
                 }
             );

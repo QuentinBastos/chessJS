@@ -125,10 +125,9 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import navButton from "@/components/tools/button.vue";
 import {onMounted, ref} from "vue";
-import LeaderBoard from "@/views/ChessLeaderBoard.vue";
 
 const storedUser = ref();
 
