@@ -54,7 +54,7 @@ import { useGameService } from "@/composable/game/useGameService";
 import { initBoard } from '@/composable/gamePlay';
 import {onMounted, ref} from "vue";
 import {useRoute} from "vue-router"
-import AsideHome from "@/components/home/aside.vue";
+import AsideHome from "@/components/home/ChessAside.vue";
 
 const { fetchGameById } = useGameService();
 const currentTurn = ref<ChessColor>(ChessColor.White);

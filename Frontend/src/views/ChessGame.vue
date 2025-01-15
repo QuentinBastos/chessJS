@@ -164,7 +164,7 @@ import {
   ChessColor,
 } from "@/constants";
 
-import AsideHome from "@/components/home/aside.vue";
+import  AsideHome from "@/components/home/ChessAside.vue";
 import { useGameService } from "@/composable/game/useGameService";
 import { useHistoryService } from "@/composable/history/useHistoryService";
 import {

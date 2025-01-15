@@ -37,6 +37,6 @@
 
 <script setup lang="ts">
 
-import AsideHome from "@/components/home/aside.vue";
+import AsideHome from "@/components/home/ChessAside.vue";
 import ButtonIcon from "@/components/tools/buttonIcon.vue";
 </script>

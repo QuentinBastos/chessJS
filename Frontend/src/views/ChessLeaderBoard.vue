@@ -37,7 +37,7 @@
 
 <script setup lang="ts">
 
-import AsideHome from "@/components/home/aside.vue";
+import AsideHome from "@/components/home/ChessAside.vue";
 import {ref, onMounted} from "vue";
 import { useUserService } from "@/composable/user/useUserService";
 

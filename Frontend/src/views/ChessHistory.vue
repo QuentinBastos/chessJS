@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 
-import AsideHome from "@/components/home/aside.vue";
+import AsideHome from "@/components/home/ChessAside.vue";
 import {computed, onMounted, ref} from "vue";
 import {useGameService} from "@/composable/game/useGameService";
 import {useHistoryService} from "@/composable/history/useHistoryService";
