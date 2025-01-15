@@ -1,14 +1,28 @@
-FROM node:22
+FROM node as builder
 
 # Set the working directory in the container
-WORKDIR /src/
+WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm ci
 
 COPY . .
 
-EXPOSE 3000
+RUN npm run build
 
-CMD ["npm", "start"]
+FROM node:slim
+
+ENV NODE_ENV production
+USER node
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN npm ci --production
+
+COPY --from=builder /usr/src/app/dist ./dist
+
+EXPOSE 8080
+CMD ["node", "dist/index.js"]
