@@ -4,6 +4,7 @@
   "main": "dist/app.js",
   "scripts": {
     "start": "tsc && node dist/app.js",
+    "builder": "tsc",
     "lint": "eslint ..",
     "test": "jest",
     "swagger": "tsoa spec && tsoa routes",
