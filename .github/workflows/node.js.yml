@@ -35,6 +35,6 @@ jobs:
         npm run lint
         npm run typecheck
     - name: Build Docker image
-      working-directory: ./Backend
+      working-directory: ./Backend/docker/
       run: |
         docker build -t nodejs-chess .
