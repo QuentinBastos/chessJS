@@ -7,7 +7,7 @@ COPY package*.json ./
 
 RUN npm install
 
-COPY . .
+COPY docker .
 
 EXPOSE 3000
 
