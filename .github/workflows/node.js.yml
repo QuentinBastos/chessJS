@@ -35,7 +35,7 @@ jobs:
         npm run lint
         npm run typecheck
     - name: Log in to DockerHub
-      run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+      run: echo "${{ secrets.SECRET_DOCKER }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
     - name: Build Docker image
       working-directory: ./Backend/
       run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/nodejs-chess:${{ github.sha }} .
